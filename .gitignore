@@ -1,0 +1,30 @@
+# Archivos de entorno y credenciales
+.env
+.env.local
+*.env
+
+# Python y Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+venv/
+env/
+.venv/
+
+# Node y Angular
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker y Base de datos local
+postgres_data/
+
+# Sistema y editores
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
