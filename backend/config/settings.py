@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +52,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'apps.core',
+    'apps.users',
 ]
+
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -151,6 +156,30 @@ PASSWORD_HASHERS = [
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+# Fusiona estas claves con tu REST_FRAMEWORK existente (conserva DEFAULT_SCHEMA_CLASS)
+REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = [
+    "rest_framework_simplejwt.authentication.JWTAuthentication",
+]
+REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = ["rest_framework.permissions.IsAuthenticated"]
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "login": "5/min",       # por IP + correo
+    "register": "10/hour",
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+}
+
+
+
+
+
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'ClickModa API',

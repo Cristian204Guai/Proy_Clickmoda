@@ -18,3 +18,8 @@ rpds-py==2026.9.1
 sqlparse==0.6.1
 tzdata==2026.6
 uritemplate==4.2.0
+djangorestframework-simplejwt>=5.5.1
+
+
+
+
