@@ -54,6 +54,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.core',
     'apps.users',
+
+    # Terceros
+    'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -61,6 +67,10 @@ AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # <--- AQUÍ (muy importante su posición)
+    
+    
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
