@@ -54,12 +54,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.core',
     'apps.users',
+    'apps.catalog',
 
     # Terceros
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
+    'django_filters',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -176,6 +178,20 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     "login": "5/min",       # por IP + correo
     "register": "10/hour",
 }
+
+REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = "rest_framework.pagination.PageNumberPagination"
+REST_FRAMEWORK["PAGE_SIZE"] = 8
+REST_FRAMEWORK["DEFAULT_FILTER_BACKENDS"] = [
+    "django_filters.rest_framework.DjangoFilterBackend",
+    "rest_framework.filters.SearchFilter",
+    "rest_framework.filters.OrderingFilter",
+]
+
+
+
+
+
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),

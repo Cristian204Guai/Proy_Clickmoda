@@ -7,47 +7,9 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink],
-  template: `
-    <main class="auth">
-      <h1>Iniciar sesión</h1>
-      <form [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="loading()">
-        <label for="email">Correo electrónico</label>
-        <input id="email" type="email" formControlName="email" autocomplete="email"
-               [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid" />
-        @if (form.controls.email.touched && form.controls.email.invalid) {
-          <p class="field-error">Ingresa un correo válido.</p>
-        }
-
-        <label for="password">Contraseña</label>
-        <input id="password" type="password" formControlName="password" autocomplete="current-password"
-               [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid" />
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          <p class="field-error">La contraseña es obligatoria.</p>
-        }
-
-        @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
-
-        <button type="submit" [disabled]="loading()">
-          {{ loading() ? 'Ingresando…' : 'Ingresar' }}
-        </button>
-      </form>
-      <p>¿No tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
-    </main>
-  `,
-  styles: [`
-    .auth { max-width: 24rem; margin: 2rem auto; padding: 1.5rem; background: #fff;
-            border: 1px solid #e5e7eb; border-radius: .75rem; color: var(--color-text, #111827); }
-    form { display: grid; gap: .5rem; }
-    label { font-weight: 600; margin-top: .5rem; }
-    input { padding: .6rem .75rem; border: 1px solid #9ca3af; border-radius: .5rem; font: inherit; }
-    input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--color-accent, #F59E0B); outline-offset: 2px; }
-    input[aria-invalid='true'] { border-color: #b91c1c; }
-    .field-error, .form-error { color: #b91c1c; margin: 0; font-size: .875rem; }
-    button { margin-top: 1rem; padding: .7rem; border: 0; border-radius: .5rem; cursor: pointer;
-             background: var(--color-primary, #2563EB); color: #fff; font-weight: 600; }
-    button:disabled { opacity: .6; cursor: not-allowed; }
-    a { color: var(--color-primary, #2563EB); }
-  `],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
+  
 })
 export class LoginComponent {
   private readonly fb = inject(NonNullableFormBuilder);

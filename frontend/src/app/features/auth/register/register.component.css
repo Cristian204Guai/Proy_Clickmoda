@@ -1,0 +1,272 @@
+.auth {
+  position: relative;
+  max-width: 24rem;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  color: var(--color-text, #111827);
+  box-shadow: 
+    0 20px 35px -10px rgba(17, 24, 39, 0.08),
+    0 4px 12px -2px rgba(37, 99, 235, 0.05);
+  overflow: hidden;
+  /* Entrada elástica suave */
+  animation: cardEntrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Barra superior con degradado animado en movimiento continuo */
+.auth::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg, 
+    var(--color-primary, #2563EB), 
+    var(--color-accent, #F59E0B), 
+    var(--color-primary, #2563EB)
+  );
+  background-size: 200% 100%;
+  animation: gradientFlow 4s ease infinite;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* Aparición escalonada de los hijos del formulario */
+form > * {
+  animation: itemSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+form > *:nth-child(1) { animation-delay: 0.05s; }
+form > *:nth-child(2) { animation-delay: 0.1s; }
+form > *:nth-child(3) { animation-delay: 0.15s; }
+form > *:nth-child(4) { animation-delay: 0.2s; }
+form > *:nth-child(5) { animation-delay: 0.25s; }
+form > *:nth-child(6) { animation-delay: 0.3s; }
+form > *:nth-child(n+7) { animation-delay: 0.35s; }
+
+label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 0.6rem;
+  color: #374151;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Pequeño desplazamiento hacia la derecha al enfocar el input correspondiente */
+label:has(+ input:focus) {
+  color: var(--color-primary, #2563EB);
+  transform: translateX(3px);
+}
+
+input {
+  padding: 0.65rem 0.85rem;
+  background-color: #f9fafb;
+  border: 1px solid #9ca3af;
+  border-radius: 0.5rem;
+  font: inherit;
+  color: var(--color-text, #111827);
+  transition: 
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.15s ease;
+}
+
+input:hover:not(:disabled) {
+  background-color: #ffffff;
+  border-color: #6b7280;
+}
+
+input:focus {
+  background-color: #ffffff;
+  border-color: var(--color-primary, #2563EB);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--color-accent, #F59E0B);
+  outline-offset: 2px;
+}
+
+/* Estado de error con vibración */
+input[aria-invalid='true'] {
+  border-color: #b91c1c;
+  background-color: #fef2f2;
+  animation: shakeError 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+input[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.15);
+}
+
+/* Texto de ayuda (.help) */
+.help {
+  color: #4b5563;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+input:focus + .help {
+  color: #1f2937;
+}
+
+.field-error,
+.form-error {
+  color: #b91c1c;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: errorReveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Botón con efecto de destello (shimmer) al pasar el mouse */
+button {
+  position: relative;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  background-color: var(--color-primary, #2563EB);
+  background-image: linear-gradient(135deg, var(--color-primary, #2563EB), #1d4ed8);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: 
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Reflejo diagonal que cruza el botón */
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.55s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  filter: brightness(1.05);
+}
+
+button:hover:not(:disabled)::after {
+  left: 140%;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Enlace con subrayado animado desde la izquierda */
+a {
+  position: relative;
+  display: inline-block;
+  color: var(--color-primary, #2563EB);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-accent, #F59E0B);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+a:hover {
+  color: #1d4ed8;
+}
+
+a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* --- KEYFRAMES --- */
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes itemSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shakeError {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-5px); }
+  40%, 60% { transform: translateX(5px); }
+}
+
+@keyframes errorReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -9,3 +9,84 @@
   --color-cm-black: #111827;
 }
 
+
+:root {
+  --brand-color: #2563EB;
+  color-scheme: light;
+}
+body {
+  background-color: var(--color-cm-light-gray);
+  color: var(--color-cm-black);
+  accent-color: var(--brand-color);
+  line-height: 1.5;
+  text-align: start;
+}
+/* Foco de teclado de alto contraste en toda la app */
+:where(a:any-link, button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--color-cm-amber);
+  outline-offset: 2px;
+}
+/* Oculto visualmente pero accesible a lectores de pantalla y visible al recibir foco (skip-link) */
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+/* Fallback progresivo si el navegador no soporta accent-color */
+@supports not (accent-color: var(--brand-color)) {
+  input[type="checkbox"].brand-checkbox {
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+  }
+  label.brand-checkbox-label {
+    position: relative;
+    padding-left: 1.75rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+  input[type="checkbox"].brand-checkbox + span::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 2px solid #6b7280;
+    background: #ffffff;
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+  }
+  input[type="checkbox"].brand-checkbox:focus-visible + span::before {
+    outline: 3px solid var(--color-cm-amber);
+    outline-offset: 2px;
+  }
+  input[type="checkbox"].brand-checkbox:checked + span::before {
+    background-color: var(--brand-color);
+    border-color: var(--brand-color);
+  }
+  input[type="checkbox"].brand-checkbox:checked + span::after {
+    content: "✓";
+    position: absolute;
+    left: 0.22rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+}
