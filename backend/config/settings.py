@@ -23,12 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'clickmoda_db'),
-        'USER': os.getenv('DB_USER', 'admin'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'cam04'),
-        'HOST': os.getenv('DB_HOST', 'db')
-        ,
-        'PORT': os.getenv('DB_PORT', 5432),
+        'NAME': os.environ['POSTGRES_DB'],
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': os.environ['DB_PORT'],
     }
 }
 
@@ -36,10 +35,10 @@ DATABASES = {
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@cwi766y71#f71h71r6l!7liczn5ohz+jx1(k@(75ailzpov1u'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = []
 
@@ -58,6 +57,7 @@ INSTALLED_APPS = [
     'apps.catalog',
     'apps.coupons',
     'apps.cart',
+    'apps.orders',
 
     # Terceros
     'corsheaders',
