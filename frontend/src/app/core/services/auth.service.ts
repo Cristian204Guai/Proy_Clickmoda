@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { API_URL } from '../api.config';
+import { CartService } from './cart.service'
 
 export type Role = 'CLIENTE' | 'ADMIN';
 
@@ -25,6 +26,7 @@ const USER = 'cm_user';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_URL}/auth`;
+  private readonly cartService = inject(CartService);
 
   private readonly _user = signal<User | null>(this.readUser());
   readonly user = this._user.asReadonly();
@@ -40,6 +42,7 @@ export class AuthService {
         localStorage.setItem(ACCESS, r.access);
         localStorage.setItem(REFRESH, r.refresh);
         this.setUser(r.user);
+        this.cartService.mergeGuestCart().subscribe({ error: () => {} }); // intenta fusionar el carrito de invitado con el del usuario
       }),
       map((r) => r.user),
     );

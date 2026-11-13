@@ -7,6 +7,16 @@ export const routes: Routes = [
     pathMatch: 'full',
     loadComponent: () => import('./features/catalog/catalog/catalog.component').then((m) => m.CatalogComponent),
   },
+
+  {
+    path: 'carrito',
+    loadComponent: () =>
+
+      import('./features/cart/cart/cart.component').then((m) => m.CartComponent),
+  },
+
+
+
   {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent),

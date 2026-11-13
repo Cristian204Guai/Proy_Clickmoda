@@ -1,3 +1,6 @@
+from datetime import timedelta, timedelta
+from django.utils import timezone
+from apps.coupons.models import Coupon
 from django.core.management.base import BaseCommand
 from apps.catalog.models import Category, Product, ProductImage, ProductVariant
 
@@ -143,3 +146,38 @@ class Command(BaseCommand):
                     )
 
         self.stdout.write(self.style.SUCCESS("Catálogo poblado correctamente (10 prendas)."))
+
+
+        # cupones de prueba
+        ahora = timezone.now()
+        Coupon.objects.update_or_create(
+            codigo="CLICK10",
+            defaults={
+                "tipo": Coupon.DiscountType.PORCENTAJE,
+                "valor": 10,
+                "valido_desde": ahora - timedelta(days=1),
+                "valido_hasta": ahora + timedelta(days=90),
+                "usos_maximos": 100,
+                "activo": True,
+            },
+        )
+        Coupon.objects.update_or_create(
+            codigo="MODA20",
+            defaults={
+                "tipo": Coupon.DiscountType.VALOR,
+                "valor": 20000,
+                "valido_desde": ahora - timedelta(days=1),
+                "valido_hasta": ahora + timedelta(days=90),
+                "usos_maximos": 50,
+                "activo": True,
+            },
+        )
+        self.stdout.write(self.style.SUCCESS("Cupones CLICK10 (10%) y MODA20 ($20.000) listos."))
+
+
+
+
+
+
+
+

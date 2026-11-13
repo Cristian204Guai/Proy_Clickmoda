@@ -1,0 +1,42 @@
+<main id="content" tabindex="-1" class="account-page">
+  <section class="account-card" aria-labelledby="account-heading">
+    <!-- Encabezado con avatar e información principal -->
+    <header class="account-header">
+      <div class="account-avatar" aria-hidden="true">
+        {{ (auth.user()?.nombre || 'U').charAt(0).toUpperCase() }}
+      </div>
+
+      <div class="account-title-group">
+        <span class="account-badge">Cuenta activa</span>
+        <h1 id="account-heading" class="account-title">Mi cuenta</h1>
+        <p class="account-subtitle">
+          Hola, <strong>{{ auth.user()?.nombre || 'Cliente' }}</strong>
+        </p>
+      </div>
+    </header>
+
+    <!-- Detalles del perfil -->
+    <div class="account-details">
+      <div class="detail-item">
+        <span class="detail-label">Nombre completo</span>
+        <span class="detail-value">{{ auth.user()?.nombre }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Correo electrónico</span>
+        <span class="detail-value">{{ auth.user()?.email }}</span>
+      </div>
+    </div>
+
+    <!-- Accesos rápidos y cierre de sesión -->
+    <footer class="account-actions">
+      <a routerLink="/" class="btn-secondary">
+        Volver a la tienda
+      </a>
+
+      <button type="button" (click)="logout()" class="btn-logout">
+        Cerrar sesión
+      </button>
+    </footer>
+  </section>
+</main>

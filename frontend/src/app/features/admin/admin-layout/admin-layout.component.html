@@ -1,0 +1,21 @@
+<div class="admin">
+  <aside class="admin__sidebar">
+    <strong class="admin__brand">Click<span class="admin__brand-accent">Moda</span></strong>
+    <nav class="admin__nav" aria-label="Administración">
+      <ul>
+        <li><a routerLink="/admin" routerLinkActive="is-active">Panel</a></li>
+        <li><a routerLink="/admin/productos" routerLinkActive="is-active">Productos</a></li>
+        <li><a routerLink="/admin/categorias" routerLinkActive="is-active">Categorías</a></li>
+        <li><a routerLink="/admin/ordenes" routerLinkActive="is-active">Órdenes</a></li>
+        <li><a routerLink="/admin/usuarios" routerLinkActive="is-active">Usuarios</a></li>
+        <li><a routerLink="/admin/facturacion" routerLinkActive="is-active">Facturación DIAN</a></li>
+      </ul>
+    </nav>
+    <button type="button" class="admin__logout" (click)="logout()">Cerrar sesión</button>
+  </aside>
+
+  <main class="admin__main">
+    <h1 class="admin__title">Panel de administración</h1>
+    <p class="admin__session">Sesión: {{ auth.user()?.email }} ({{ auth.user()?.role }})</p>
+  </main>
+</div>

@@ -9,6 +9,7 @@ import {
   Product,
   SizeOption,
 } from '../../../core/services/catalog.service';
+import { CartService } from '../../../core/services/cart.service';
 
 interface ColorOption {
   name: string;
@@ -30,7 +31,9 @@ export class CatalogComponent implements OnInit {
   readonly totalCount = signal(0);
   readonly loading = signal(false);
   readonly mobileFiltersOpen = signal(false);
-  readonly cartCount = signal(3); // Valor visual del prototipo hasta conectar Carrito en Días 8-10
+  private readonly cartService = inject(CartService);
+  readonly cartCount = this.cartService.totalUnits; // Valor visual del prototipo hasta conectar Carrito en Días 8-10
+  
 
   // Estado de filtros
   readonly selectedCategories = signal<string[]>([]);
@@ -60,6 +63,7 @@ export class CatalogComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.cartService.loadCart().subscribe();
     this.catalogService.getCategories().subscribe({
       next: (cats) => this.categories.set(cats),
     });
@@ -157,7 +161,17 @@ export class CatalogComponent implements OnInit {
     return `Tallas ${sizes[0]} - ${sizes[sizes.length - 1]}`;
   }
 
-  addToCartPreview(_product: Product): void {
-    this.cartCount.update((c) => c + 1);
+  addToCartPreview(product: Product): void {
+    const sizeFilter = this.selectedSize();
+    const colorFilter = this.selectedColor();
+    const variant =
+      product.variantes.find(
+        (v) =>
+          v.stock > 0 &&
+          (!sizeFilter || v.talla === sizeFilter) &&
+          (!colorFilter || v.color === colorFilter)
+      ) ?? product.variantes.find((v) => v.stock > 0);
+    if (!variant) return;
+    this.cartService.addItem(variant.id, 1).subscribe();
   }
 }
