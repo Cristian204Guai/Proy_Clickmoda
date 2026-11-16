@@ -215,6 +215,19 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Documentación de endpoints para catálogo, carrito, órdenes y DIAN simulada.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+
+    # Permite que Swagger UI muestre el boton de autenticación "Authorize"
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [{'BearerAuth': []}],
+    'SECURITY_SCHEMES': {
+        'BearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+        }
+    },
+    # Pin a la versión 2.1.5 clásica que no usa módulos ESM (evita el error 'import.meta')
+    'REDOC_DIST': 'https://cdn.jsdelivr.net/npm/redoc@2.1.5',
 }
 
 # permite el encabezado personalizado x-cart-session para el carrito de visitante.
