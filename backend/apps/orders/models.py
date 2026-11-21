@@ -60,6 +60,9 @@ class Order(models.Model):
     # Solo se guarda el token de la pasarela o referencia, JAMÁS tarjeta ni CVV
     token_pago = models.CharField(max_length=120, blank=True, default="")
 
+    # Controla de forma idempotente si el stock de las variantes ya fue descontado
+    stock_descontado = models.BooleanField(default=False)
+
     subtotal = models.DecimalField(max_digits=12, decimal_places=0)
     envio = models.DecimalField(max_digits=12, decimal_places=0, default=12000)
     impuestos = models.DecimalField(max_digits=12, decimal_places=0)

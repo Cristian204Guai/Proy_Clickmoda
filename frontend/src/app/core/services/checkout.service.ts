@@ -5,6 +5,7 @@ import { API_URL } from '../api.config';
 import { CartService } from './cart.service';
 
 export type PaymentMethod = 'TARJETA' | 'PSE' | 'NEQUI_DAVIPLATA' | 'CONTRA_ENTREGA';
+export type PaymentSimulationResult = 'APROBADO' | 'RECHAZADO' | 'EXPIRADO';
 
 export interface CreateOrderPayload {
   nombre_completo: string;
@@ -31,11 +32,22 @@ export interface OrderItemResponse {
   subtotal: number;
 }
 
+export interface PaymentSummary {
+  id: number;
+  pasarela: string;
+  referencia: string;
+  estado: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'EXPIRADO';
+  monto: number;
+  mensaje_respuesta: string;
+  actualizado_en: string;
+}
+
 export interface OrderResponse {
   id: number;
-  estado: string;
+  estado: 'PENDIENTE' | 'PAGADA' | 'EN_PREPARACION' |'ENVIADA'| 'ENTREGADA' | 'CANCELADA';
   metodo_pago: PaymentMethod;
   token_pago: string;
+  stock_descontado: boolean;
   subtotal: number;
   envio: number;
   impuestos: number;
@@ -54,6 +66,7 @@ export interface OrderResponse {
     ciudad: string;
   };
   items: OrderItemResponse[];
+  payment?: PaymentSummary;
   creado_en: string;
 }
 
@@ -61,7 +74,8 @@ export interface OrderResponse {
 export class CheckoutService {
   private readonly http = inject(HttpClient);
   private readonly cartService = inject(CartService);
-  private readonly base = `${API_URL}/orders`;
+  private readonly ordersBase = `${API_URL}/orders`;
+  private readonly paymentsBase = `${API_URL}/payments`;
 
   private get headers(): HttpHeaders {
     return new HttpHeaders({ 'X-Cart-Session': this.cartService.sessionKey });
@@ -79,14 +93,29 @@ export class CheckoutService {
   }
 
   createOrder(payload: CreateOrderPayload): Observable<OrderResponse> {
-    return this.http.post<OrderResponse>(`${this.base}/`, payload, {
+    return this.http.post<OrderResponse>(`${this.ordersBase}/`, payload, {
       headers: this.headers,
     });
   }
 
   getOrderById(id: number): Observable<OrderResponse> {
-    return this.http.get<OrderResponse>(`${this.base}/${id}/`, {
+    return this.http.get<OrderResponse>(`${this.ordersBase}/${id}/`, {
       headers: this.headers,
     });
+  }
+
+  /**
+   * Llama al endpoint simulador de webhook (POST /api/v1/payments/webhook/)
+   * que ejecuta la transacción atómica de confirmación o rechazo de pago.
+   */
+  simulatePaymentWebhook(
+    ordenId: number,
+    resultado: PaymentSimulationResult
+  ): Observable<OrderResponse> {
+    return this.http.post<OrderResponse>(
+      `${this.paymentsBase}/webhook/`,
+      { orden_id: ordenId, resultado },
+      { headers: this.headers }
+    );
   }
 }

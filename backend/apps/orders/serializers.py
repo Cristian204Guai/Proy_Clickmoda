@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Address, Order, OrderItem
+from apps.payments.models import Payment
 
 
 class CheckoutCreateSerializer(serializers.Serializer):
@@ -53,9 +54,28 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = ("id", "nombre_completo", "telefono", "direccion", "ciudad")
 
 
+class PaymentSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "pasarela",
+            "referencia",
+            "estado",
+            "monto",
+            "mensaje_respuesta",
+            "actualizado_en",
+        )
+
+
+
+
+
+
 class OrderSerializer(serializers.ModelSerializer):
     direccion_envio = AddressSerializer(read_only=True)
     items = OrderItemSerializer(many=True, read_only=True)
+    payment = PaymentSummarySerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -64,6 +84,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "estado",
             "metodo_pago",
             "token_pago",
+            "stock_descontado",
             "subtotal",
             "envio",
             "impuestos",
@@ -76,5 +97,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "correo_factura",
             "direccion_envio",
             "items",
+            "payment",
             "creado_en",
         )
+
+    

@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -9,6 +10,7 @@ from apps.cart.models import Cart
 from apps.cart.views import get_or_create_active_cart
 from .models import Address, Order, OrderItem
 from .serializers import CheckoutCreateSerializer, OrderSerializer
+from apps.payments.models import Payment
 
 
 class OrderListCreateView(APIView):
@@ -16,14 +18,13 @@ class OrderListCreateView(APIView):
 
     def get(self, request):
         if request.user and request.user.is_authenticated:
-            ordenes = Order.objects.filter(user=request.user).prefetch_related(
-                "items", "direccion_envio"
-            )
+            ordenes = (Order.objects.filter(user=request.user).select_related(
+                "direccion_envio", "payment").prefetch_related("items"))
         else:
             session_key = request.headers.get("X-Cart-Session") or ""
-            ordenes = Order.objects.filter(
+            ordenes = (Order.objects.filter(
                 user=None, session_key=session_key
-            ).prefetch_related("items", "direccion_envio")
+            ).select_related("direccion_envio", "payment").prefetch_related("items"))
         return Response(OrderSerializer(ordenes, many=True).data)
 
     @transaction.atomic
@@ -82,6 +83,8 @@ class OrderListCreateView(APIView):
             estado=Order.Status.PENDIENTE,
             metodo_pago=data["metodo_pago"],
             token_pago=data.get("token_pago", ""),
+            # RF-13: stock_descontado se establece en False al crear la orden
+            stock_descontado=False,
             subtotal=subtotal,
             envio=envio,
             impuestos=impuestos,
@@ -95,6 +98,8 @@ class OrderListCreateView(APIView):
             or (user.email if user else ""),
         )
 
+
+        # Crear OrderItems congelando el precio_unitario y porcentaje_iva al momento de la compra
         for item in cart_items:
             OrderItem.objects.create(
                 orden=orden,
@@ -107,7 +112,29 @@ class OrderListCreateView(APIView):
                 porcentaje_iva=item.variante.producto.porcentaje_iva,
             )
 
-        return Response(OrderSerializer(orden).data, status=status.HTTP_201_CREATED)
+
+        # Crear la transacción de pago en estado PENDIENTE (Sección 6: POST /orders crea orden y transacción)
+        pasarela = (
+            Payment.Gateway.CONTRA_ENTREGA
+            if orden.metodo_pago == Order.PaymentMethod.CONTRA_ENTREGA
+            else Payment.Gateway.WOMPI_SIM
+        )
+        referencia = f"CM-PAY-{orden.pk:04d}-{uuid.uuid4().hex[:6].upper()}"
+        Payment.objects.create(
+            orden=orden,
+            pasarela=pasarela,
+            referencia=referencia,
+            estado=Payment.Status.PENDIENTE,
+            monto=orden.total,
+            mensaje_respuesta="Transacción iniciada, esperando confirmación de pasarela.",
+        )
+        orden_completa = (
+            Order.objects.select_related("direccion_envio", "payment")
+            .prefetch_related("items")
+            .get(pk=orden.pk)
+        )
+
+        return Response(OrderSerializer(orden_completa).data, status=status.HTTP_201_CREATED)
 
 
 class OrderDetailView(APIView):
@@ -115,6 +142,6 @@ class OrderDetailView(APIView):
 
     def get(self, request, pk: int):
         orden = get_object_or_404(
-            Order.objects.prefetch_related("items", "direccion_envio"), pk=pk
+            Order.objects.select_related("direccion_envio", "payment").prefetch_related("items"), pk=pk
         )
         return Response(OrderSerializer(orden).data)

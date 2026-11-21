@@ -102,59 +102,138 @@
     </div>
   }
 
-  @if (createdOrder(); as order) {
-    <!-- Confirmación preliminar de Orden Creada (Lista para conectar con Webhook y DIAN en Días 12-14) -->
+    @if (createdOrder(); as order) {
     <section
       aria-labelledby="order-created-heading"
-      class="rounded-2xl border border-gray-200 bg-white p-8 shadow-xs"
+      class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs sm:p-8"
     >
       <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-4">
         <div>
-          <span class="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-cm-blue">
-            Orden #{{ order.id }} registrada ({{ order.estado }})
+          <span
+            [class]="
+              order.estado === 'PAGADA'
+                ? 'badge-status badge-status-paid'
+                : order.estado === 'CANCELADA'
+                  ? 'badge-status badge-status-cancelled'
+                  : 'badge-status badge-status-pending'
+            "
+          >
+            Orden #{{ order.id }} · {{ order.estado }}
           </span>
           <h1 id="order-created-heading" class="mt-2 text-2xl font-extrabold text-cm-black">
-            ¡Pedido creado correctamente!
+            @if (order.estado === 'PAGADA') {
+              ¡Pago confirmado y stock descontado!
+            } @else if (order.estado === 'CANCELADA') {
+              Pago rechazado · Reserva de stock liberada
+            } @else {
+              Orden creada en estado Pendiente
+            }
           </h1>
           <p class="mt-1 text-sm text-gray-600">
             Envío a {{ order.direccion_envio.nombre_completo }} — {{ order.direccion_envio.direccion }}, {{ order.direccion_envio.ciudad }}.
           </p>
         </div>
         <div class="text-right">
-          <p class="text-xs text-gray-500">Total de la orden</p>
+          <p class="text-xs text-gray-500">Total congelado en la orden</p>
           <p class="text-2xl font-extrabold text-cm-black">
             {{ order.total | currency: 'COP' : '$' : '1.0-0' }}
           </p>
         </div>
       </div>
 
-      <div class="mt-5 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-        <div class="rounded-xl bg-gray-50 p-4">
-          <p class="font-semibold text-gray-700">Método seleccionado</p>
-          <p class="mt-1 font-bold text-cm-black">{{ order.metodo_pago }}</p>
-          <p class="mt-0.5 text-xs text-gray-500">Referencia tokenizada: {{ order.token_pago }}</p>
+      <!-- Resumen de transacción Payment -->
+      @if (order.payment; as payment) {
+        <div class="mt-5 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="font-semibold text-gray-700">Referencia de Pasarela</p>
+            <p class="mt-1 font-bold text-cm-black">{{ payment.referencia }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">{{ payment.pasarela }} ({{ order.metodo_pago }})</p>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="font-semibold text-gray-700">Estado de la Transacción</p>
+            <p class="mt-1 font-bold text-cm-black">{{ payment.estado }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">{{ payment.mensaje_respuesta }}</p>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="font-semibold text-gray-700">Estado del Inventario</p>
+            <p class="mt-1 font-bold text-cm-black">
+              {{ order.stock_descontado ? '✓ Stock descontado en BD' : 'Stock sin descontar / Liberado' }}
+            </p>
+            <p class="mt-0.5 text-xs text-gray-500">Transacción atómica PostgreSQL</p>
+          </div>
         </div>
-        <div class="rounded-xl bg-gray-50 p-4">
-          <p class="font-semibold text-gray-700">Factura electrónica DIAN</p>
-          <p class="mt-1 font-bold text-cm-black">
-            {{ order.requiere_factura_electronica ? 'Solicitada a tu nombre' : 'Consumidor final' }}
-          </p>
-        </div>
-        <div class="rounded-xl bg-gray-50 p-4">
-          <p class="font-semibold text-gray-700">Seguridad de pago</p>
-          <p class="mt-1 text-xs text-gray-600">
-            ✓ Ningún número de tarjeta ni CVV fue almacenado.
-          </p>
-        </div>
+      }
+
+      <!-- Tabla de OrderItems con Precio e IVA congelados al momento de la compra -->
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <caption class="visually-hidden">Prendas de la orden con precio e IVA congelados</caption>
+          <thead class="border-b border-gray-200 text-xs font-bold text-gray-600">
+            <tr>
+              <th scope="col" class="py-2 pr-4">Prenda (Variante)</th>
+              <th scope="col" class="py-2 px-4">Cant.</th>
+              <th scope="col" class="py-2 px-4">Precio unit. congelado</th>
+              <th scope="col" class="py-2 px-4">IVA congelado</th>
+              <th scope="col" class="py-2 pl-4 text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (item of order.items; track item.id) {
+              <tr>
+                <td class="py-2.5 pr-4 font-semibold text-cm-black">
+                  {{ item.nombre_producto }} ({{ item.talla }} · {{ item.color }})
+                </td>
+                <td class="py-2.5 px-4">{{ item.cantidad }}</td>
+                <td class="py-2.5 px-4">
+                  {{ item.precio_unitario | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+                <td class="py-2.5 px-4">{{ item.porcentaje_iva }}%</td>
+                <td class="py-2.5 pl-4 text-right font-bold text-cm-black">
+                  {{ item.subtotal | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
 
-      <div class="mt-6 flex flex-wrap gap-3">
-        <button type="button" (click)="continueShopping()" class="btn-pay px-6">
-          Volver al catálogo
-        </button>
+      <!-- Simulador interactivo del Webhook de la Pasarela (RF-13 y RF-14) -->
+      <div class="gateway-simulator mt-6">
+        <h2 class="text-sm font-extrabold text-cm-black">
+          Simulador de Pasarela de Pago (Webhook `POST /api/v1/payments/webhook/`)
+        </h2>
+        <p class="mt-1 text-xs text-gray-600">
+          Simula la respuesta firmada de la pasarela para ejecutar la transacción atómica:
+        </p>
+
+        <div class="mt-3 flex flex-wrap gap-3">
+          <button
+            type="button"
+            (click)="simulateWebhook('APROBADO')"
+            [disabled]="simulatingWebhook() || order.estado === 'PAGADA'"
+            class="btn-sim-approve"
+          >
+            ✓ Simular Pago Aprobado (Descontar stock)
+          </button>
+
+          <button
+            type="button"
+            (click)="simulateWebhook('RECHAZADO')"
+            [disabled]="simulatingWebhook()"
+            class="btn-sim-reject"
+          >
+            ✕ Simular Fallo de Pago (Liberar / Devolver stock)
+          </button>
+
+          <button type="button" (click)="continueShopping()" class="btn-pay">
+            Volver al catálogo
+          </button>
+        </div>
       </div>
     </section>
-  } @else {
+  }
+  
+  @else {
     <!-- Formulario Reactivo Principal de Checkout -->
     <form
       [formGroup]="checkoutForm"

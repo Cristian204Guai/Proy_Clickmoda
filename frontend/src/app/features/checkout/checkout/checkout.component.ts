@@ -13,6 +13,7 @@ import {
   CheckoutService,
   OrderResponse,
   PaymentMethod,
+  PaymentSimulationResult,
 } from '../../../core/services/checkout.service';
 
 export type CheckoutStep = 2 | 3 | 4;
@@ -35,6 +36,9 @@ export class CheckoutComponent implements OnInit {
   readonly submitting = signal(false);
   readonly submitError = signal<string | null>(null);
   readonly createdOrder = signal<OrderResponse | null>(null);
+
+
+
 
   /**
    * Formulario reactivo estrictamente tipado.
@@ -213,6 +217,56 @@ export class CheckoutComponent implements OnInit {
         },
       });
   }
+
+    readonly simulatingWebhook = signal(false);
+
+  simulateWebhook(resultado: PaymentSimulationResult): void {
+    const current = this.createdOrder();
+    if (!current) return;
+
+    this.submitError.set(null);
+    this.simulatingWebhook.set(true);
+
+    this.checkoutService.simulatePaymentWebhook(current.id, resultado).subscribe({
+      next: (updatedOrder) => {
+        this.simulatingWebhook.set(false);
+        this.createdOrder.set(updatedOrder);
+        // Sincronizar el contador del carrito (se vacía al aprobarse el pago)
+        this.cartService.loadCart().subscribe();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.simulatingWebhook.set(false);
+        this.submitError.set(
+          err.error?.detail ?? 'Error al procesar la confirmación de pago en la pasarela.'
+        );
+      },
+    });
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   continueShopping(): void {
     this.router.navigateByUrl('/');

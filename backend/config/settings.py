@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'apps.coupons',
     'apps.cart',
     'apps.orders',
+    'apps.payments',
 
     # Terceros
     'corsheaders',
