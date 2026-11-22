@@ -21,6 +21,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'factura/:id',
+    loadComponent: () =>
+      import('./features/invoices/invoice-detail/invoice-detail.component').then((m) => m.InvoiceDetailComponent),
+  },
+
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },

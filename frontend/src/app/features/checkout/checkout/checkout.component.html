@@ -225,6 +225,15 @@
             ✕ Simular Fallo de Pago (Liberar / Devolver stock)
           </button>
 
+          @if (order.factura_id) {
+            <a
+              [routerLink]="['/factura', order.factura_id]"
+              class="btn-sim-approve no-underline"
+            >
+              Ver factura electrónica ({{ order.factura_numero }})
+            </a>
+          }
+
           <button type="button" (click)="continueShopping()" class="btn-pay">
             Volver al catálogo
           </button>

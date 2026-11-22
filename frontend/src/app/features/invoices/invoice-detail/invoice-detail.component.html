@@ -1,0 +1,279 @@
+<a
+  href="#invoice-main"
+  class="visually-hidden focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-cm-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-cm-black"
+>
+  Saltar a la factura electrónica
+</a>
+
+<!-- Encabezado principal -->
+<header class="bg-cm-dark-gray text-white">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-8">
+      <a routerLink="/" class="text-2xl font-extrabold tracking-tight text-white">
+        Click<span class="text-cm-amber">Moda</span>
+      </a>
+      <nav aria-label="Categorías principales" class="hidden md:block">
+        <ul class="flex items-center gap-6 text-sm font-medium text-gray-200">
+          <li><a routerLink="/" class="hover:text-white">Mujer</a></li>
+          <li><a routerLink="/" class="hover:text-white">Hombre</a></li>
+          <li><a routerLink="/" class="hover:text-white">Niños</a></li>
+          <li><a routerLink="/" class="hover:text-cm-amber">Ofertas</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <nav aria-label="Cuenta y carrito" class="flex items-center gap-4 text-sm font-medium whitespace-nowrap">
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/cuenta" class="text-gray-100 hover:text-white">Mi cuenta</a>
+      } @else {
+        <a routerLink="/login" class="text-gray-100 hover:text-white">Mi cuenta</a>
+      }
+      <a routerLink="/carrito" class="font-semibold text-cm-amber hover:underline">
+        Carrito ({{ cartService.totalUnits() }})
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="invoice-main" tabindex="-1" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-2xl font-extrabold text-cm-black sm:text-3xl">
+    Tu factura electrónica
+  </h1>
+
+  @if (loading()) {
+    <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600" aria-busy="true">
+      Cargando factura electrónica…
+    </div>
+  } @else if (error()) {
+    <div role="alert" class="invoice-alert invoice-alert-error mt-6">
+      <span aria-hidden="true">❌</span>
+      <span>{{ error() }}</span>
+    </div>
+  } @else if (invoice(); as inv) {
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
+      <!-- Documento principal de la Factura Electrónica -->
+      <article
+        aria-label="Representación gráfica de factura electrónica de venta"
+        class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs sm:p-8"
+      >
+        <!-- Encabezado Emisor y Número -->
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 pb-5">
+          <div>
+            <p class="text-xl font-extrabold tracking-tight text-cm-black">
+              Click<span class="text-cm-amber">Moda</span>
+            </p>
+            <p class="mt-1 text-xs text-gray-600">
+              NIT {{ inv.emisor_nit }}-{{ inv.emisor_dv }} · {{ inv.emisor_direccion }}
+            </p>
+          </div>
+
+          <div class="text-left sm:text-right">
+            <h2 class="text-base font-extrabold text-cm-black">
+              Factura electrónica de venta
+            </h2>
+            <p class="mt-0.5 text-xs text-gray-600">
+              No. {{ inv.numero }} · {{ inv.fecha_emision | date: 'dd/MM/yyyy' }}
+            </p>
+            <span class="dian-validated-pill mt-2 inline-block">
+              ✓ Validada por la DIAN
+            </span>
+          </div>
+        </div>
+
+        <!-- Datos del Adquiriente y Forma de Pago -->
+        <div class="mt-5 grid grid-cols-1 gap-6 text-sm sm:grid-cols-2">
+          <div>
+            <h3 class="text-xs font-extrabold text-cm-black uppercase tracking-wide">
+              Adquirente
+            </h3>
+            <p class="mt-1 font-semibold text-cm-black">{{ inv.adquiriente_nombre }}</p>
+            <p class="text-gray-700">
+              {{ inv.adquiriente_tipo_documento }} / NIT: {{ inv.adquiriente_documento }}
+            </p>
+            <p class="text-gray-700">{{ inv.adquiriente_correo || 'Sin correo registrado' }}</p>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-extrabold text-cm-black uppercase tracking-wide">
+              Forma de pago
+            </h3>
+            <p class="mt-1 text-gray-800">Contado · {{ inv.metodo_pago_label }}</p>
+            <p class="text-gray-700">Moneda: COP</p>
+          </div>
+        </div>
+
+        <!-- Tabla de líneas con impuestos discriminados -->
+        <div class="mt-6 overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <caption class="visually-hidden">Detalle de prendas e impuestos de la factura</caption>
+            <thead class="border-y border-gray-200 bg-gray-50 text-xs font-bold text-gray-700">
+              <tr>
+                <th scope="col" class="py-2.5 px-3">Descripción</th>
+                <th scope="col" class="py-2.5 px-3 text-center">Cant.</th>
+                <th scope="col" class="py-2.5 px-3 text-right">Valor unit.</th>
+                <th scope="col" class="py-2.5 px-3 text-right">IVA</th>
+                <th scope="col" class="py-2.5 px-3 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (line of inv.detalle_lineas; track $index) {
+                <tr>
+                  <td class="py-3 px-3 font-medium text-cm-black">{{ line.descripcion }}</td>
+                  <td class="py-3 px-3 text-center">{{ line.cantidad }}</td>
+                  <td class="py-3 px-3 text-right">
+                    {{ line.valor_unitario_sin_iva | currency: 'COP' : '$' : '1.0-0' }}
+                  </td>
+                  <td class="py-3 px-3 text-right">{{ line.porcentaje_iva }}%</td>
+                  <td class="py-3 px-3 text-right font-semibold text-cm-black">
+                    {{ line.total_linea | currency: 'COP' : '$' : '1.0-0' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totales discriminados -->
+        <div class="mt-5 flex justify-end border-t border-gray-200 pt-4">
+          <dl class="w-full max-w-xs space-y-1.5 text-sm">
+            <div class="flex items-center justify-between">
+              <dt class="text-gray-600">Subtotal</dt>
+              <dd class="font-medium text-cm-black">
+                {{ inv.base_gravable | currency: 'COP' : '$' : '1.0-0' }}
+              </dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-gray-600">IVA 19%</dt>
+              <dd class="font-medium text-cm-black">
+                {{ inv.iva | currency: 'COP' : '$' : '1.0-0' }}
+              </dd>
+            </div>
+            @if (inv.descuento > 0) {
+              <div class="flex items-center justify-between text-cm-blue">
+                <dt>Descuento</dt>
+                <dd>-{{ inv.descuento | currency: 'COP' : '$' : '1.0-0' }}</dd>
+              </div>
+            }
+            <div class="flex items-center justify-between">
+              <dt class="text-gray-600">Envío</dt>
+              <dd class="font-medium text-cm-black">
+                {{ inv.envio | currency: 'COP' : '$' : '1.0-0' }}
+              </dd>
+            </div>
+            <div class="flex items-center justify-between border-t border-gray-200 pt-2 text-base font-extrabold text-cm-black">
+              <dt>Total</dt>
+              <dd>{{ inv.total | currency: 'COP' : '$' : '1.0-0' }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Bloque QR DIAN, CUFE y Resolución -->
+        <div class="mt-6 flex flex-col items-start gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-center">
+          <div class="shrink-0 rounded-lg border border-gray-300 bg-white p-1.5">
+            <svg
+              width="88"
+              height="88"
+              viewBox="0 0 100 100"
+              role="img"
+              aria-labelledby="qr-title"
+            >
+              <title id="qr-title">Código QR simulado de validación DIAN para {{ inv.numero }}</title>
+              <rect width="100" height="100" fill="#ffffff" />
+              @for (cell of qrCells(); track $index) {
+                <rect [attr.x]="cell.x" [attr.y]="cell.y" width="6" height="6" fill="#111827" />
+              }
+            </svg>
+          </div>
+
+          <div class="min-w-0 space-y-1 text-xs text-gray-700">
+            <p class="break-all">
+              <strong class="text-cm-black">CUFE:</strong> {{ inv.cufe }}
+            </p>
+            <p>
+              <strong class="text-cm-black">Resolución de numeración:</strong>
+              {{ inv.resolucion.numero_resolucion }} ({{ inv.resolucion.fecha_desde | date: 'dd/MM/yyyy' }})
+            </p>
+            <p>
+              <strong class="text-cm-black">Rango autorizado:</strong>
+              {{ inv.resolucion.rango_autorizado_texto }}
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Barra lateral derecha: Estado ante la DIAN + Acciones -->
+      <aside aria-label="Estado ante la DIAN y acciones de factura" class="space-y-5">
+        <!-- Estado ante la DIAN -->
+        <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
+          <h2 class="text-base font-extrabold text-cm-black">Estado ante la DIAN</h2>
+
+          <ul role="list" class="mt-4 space-y-3 text-sm list-none p-0 m-0">
+            <li class="flex items-center justify-between gap-2">
+              <span class="text-gray-700">Generación XML (UBL 2.1)</span>
+              <span class="step-badge step-badge-ready">{{ inv.estado_xml }}</span>
+            </li>
+            <li class="flex items-center justify-between gap-2">
+              <span class="text-gray-700">Firma digital</span>
+              <span class="step-badge step-badge-ready">{{ inv.estado_firma }}</span>
+            </li>
+            <li class="flex items-center justify-between gap-2">
+              <span class="text-gray-700">Envío al proveedor / DIAN</span>
+              <span class="step-badge step-badge-ready">{{ inv.estado_envio }}</span>
+            </li>
+            <li class="flex items-center justify-between gap-2">
+              <span class="text-gray-700">Respuesta de validación</span>
+              <span class="step-badge step-badge-approved">{{ inv.estado_respuesta }}</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Acciones -->
+        <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
+          <h2 class="text-base font-extrabold text-cm-black">Acciones</h2>
+
+          <div class="mt-4 flex flex-col gap-3">
+            <button
+              type="button"
+              (click)="downloadFile('pdf')"
+              [disabled]="downloading() === 'pdf'"
+              class="btn-invoice-primary"
+            >
+              {{ downloading() === 'pdf' ? 'Generando PDF…' : 'Descargar PDF' }}
+            </button>
+
+            <button
+              type="button"
+              (click)="downloadFile('xml')"
+              [disabled]="downloading() === 'xml'"
+              class="btn-invoice-secondary"
+            >
+              {{ downloading() === 'xml' ? 'Generando XML…' : 'Descargar XML' }}
+            </button>
+
+            <button
+              type="button"
+              (click)="resendEmail()"
+              [disabled]="resending()"
+              class="btn-invoice-amber"
+            >
+              {{ resending() ? 'Reenviando…' : 'Reenviar por correo' }}
+            </button>
+
+            <a routerLink="/" class="text-center text-xs font-semibold text-cm-blue hover:underline mt-1">
+              Seguir comprando en ClickModa
+            </a>
+          </div>
+
+          <div aria-live="polite" class="mt-3">
+            @if (actionMessage()) {
+              <p class="text-xs font-semibold text-green-700">✓ {{ actionMessage() }}</p>
+            }
+            @if (actionError()) {
+              <p class="text-xs font-semibold text-red-700">❌ {{ actionError() }}</p>
+            }
+          </div>
+        </section>
+      </aside>
+    </div>
+  }
+</main>

@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/v1/cart/", include("apps.cart.urls")),
     path("api/v1/orders/", include("apps.orders.urls")),
     path("api/v1/payments/", include("apps.payments.urls")),
+    path("api/v1/invoices/", include("apps.invoices.urls")),
 
     # Rutas de documentación de la API Swagger y OpenAPI
     # Descarga del esquema en bruto en formato JSON

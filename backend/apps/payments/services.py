@@ -7,6 +7,8 @@ from apps.catalog.models import ProductVariant
 from apps.coupons.models import Coupon
 from apps.orders.models import Order
 from .models import Payment
+from apps.invoices.services import emitir_factura_para_orden
+
 
 
 @transaction.atomic
@@ -101,6 +103,13 @@ def procesar_confirmacion_pago(
         orden.estado = Order.Status.PAGADA
         orden.stock_descontado = True
         orden.save(update_fields=["estado", "stock_descontado"])
+
+        # Emitir automaticamente la factura electronica DIAN simulada
+
+        emitir_factura_para_orden(orden)
+
+
+
 
         # Vaciar el carrito del cliente o de la sesión tras confirmar el pago
         if orden.user_id:

@@ -48,6 +48,11 @@ export interface OrderResponse {
   metodo_pago: PaymentMethod;
   token_pago: string;
   stock_descontado: boolean;
+
+  // agregar datos de facturación electrónica si requiere_factura_electronica es true
+  factura_id?: number | null;
+  factura_numero?: string | null;
+
   subtotal: number;
   envio: number;
   impuestos: number;

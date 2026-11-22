@@ -76,6 +76,8 @@ class OrderSerializer(serializers.ModelSerializer):
     direccion_envio = AddressSerializer(read_only=True)
     items = OrderItemSerializer(many=True, read_only=True)
     payment = PaymentSummarySerializer(read_only=True)
+    factura_id = serializers.SerializerMethodField()
+    factura_numero = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -98,7 +100,13 @@ class OrderSerializer(serializers.ModelSerializer):
             "direccion_envio",
             "items",
             "payment",
+            "factura_id",
+            "factura_numero",
             "creado_en",
         )
 
-    
+    def get_factura_id(self, obj) -> int | None:
+        return obj.factura.id if hasattr(obj, "factura") else None
+
+    def get_factura_numero(self, obj) -> str | None:
+        return obj.factura.numero if hasattr(obj, "factura") else None

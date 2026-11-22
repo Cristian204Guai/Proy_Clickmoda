@@ -19,12 +19,12 @@ class OrderListCreateView(APIView):
     def get(self, request):
         if request.user and request.user.is_authenticated:
             ordenes = (Order.objects.filter(user=request.user).select_related(
-                "direccion_envio", "payment").prefetch_related("items"))
+                "direccion_envio", "payment", "factura").prefetch_related("items"))
         else:
             session_key = request.headers.get("X-Cart-Session") or ""
             ordenes = (Order.objects.filter(
                 user=None, session_key=session_key
-            ).select_related("direccion_envio", "payment").prefetch_related("items"))
+            ).select_related("direccion_envio", "payment", "factura").prefetch_related("items"))
         return Response(OrderSerializer(ordenes, many=True).data)
 
     @transaction.atomic
@@ -129,7 +129,7 @@ class OrderListCreateView(APIView):
             mensaje_respuesta="Transacción iniciada, esperando confirmación de pasarela.",
         )
         orden_completa = (
-            Order.objects.select_related("direccion_envio", "payment")
+            Order.objects.select_related("direccion_envio", "payment", "factura")
             .prefetch_related("items")
             .get(pk=orden.pk)
         )
@@ -142,6 +142,6 @@ class OrderDetailView(APIView):
 
     def get(self, request, pk: int):
         orden = get_object_or_404(
-            Order.objects.select_related("direccion_envio", "payment").prefetch_related("items"), pk=pk
+            Order.objects.select_related("direccion_envio", "payment", "factura").prefetch_related("items"), pk=pk
         )
         return Response(OrderSerializer(orden).data)

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'apps.cart',
     'apps.orders',
     'apps.payments',
+    'apps.invoices',
 
     # Terceros
     'corsheaders',
@@ -233,4 +234,16 @@ SPECTACULAR_SETTINGS = {
 
 # permite el encabezado personalizado x-cart-session para el carrito de visitante.
 CORS_ALLOW_HEADERS = (*default_headers, "x-cart-session")
+
+
+
+# Datos simulados del facturador electronico (ClickModa Colombia)
+
+CLICKMODA_EMISOR = {
+    'NIT': '900123456',
+    'DV': '5',
+    'RAZON_SOCIAL': 'ClickModa Colombia S.A.S.',
+    'DIRECCION': 'Calle 5 #123, Pasto, Colombia',
+    'CORREO': 'info@clickmoda.com',
+}
 
