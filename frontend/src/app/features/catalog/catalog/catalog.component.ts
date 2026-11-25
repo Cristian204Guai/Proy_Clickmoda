@@ -33,7 +33,7 @@ export class CatalogComponent implements OnInit {
   readonly mobileFiltersOpen = signal(false);
   private readonly cartService = inject(CartService);
   readonly cartCount = this.cartService.totalUnits; // Valor visual del prototipo hasta conectar Carrito en Días 8-10
-  
+
 
   // Estado de filtros
   readonly selectedCategories = signal<string[]>([]);
@@ -150,8 +150,22 @@ export class CatalogComponent implements OnInit {
       });
   }
 
+  getProductPreviewImage(product: Product): string | null {
+    const firstImg = product.imagenes?.[0]?.url?.trim();
+    if (!firstImg) return null;
+    if (
+      firstImg.startsWith('http://') ||
+      firstImg.startsWith('https://') ||
+      firstImg.startsWith('/media/') ||
+      firstImg.startsWith('data:')
+    ) {
+      return firstImg;
+    }
+    return null;
+  }
+
   getProductPreviewColor(product: Product): string {
-    const firstImg = product.imagenes?.[0]?.url;
+    const firstImg = product.imagenes?.[0]?.url?.trim();
     return firstImg && firstImg.startsWith('#') ? firstImg : '#CBD5E1';
   }
 

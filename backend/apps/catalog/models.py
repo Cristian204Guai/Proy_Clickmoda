@@ -66,11 +66,18 @@ class ProductImage(models.Model):
     producto = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="imagenes"
     )
-    url = models.CharField(max_length=500)
+    imagen = models.ImageField(upload_to="products/%Y/%m/", blank=True, null=True)
+    url = models.CharField(max_length=500, blank=True, default="")
     orden = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ["orden", "id"]
+
+    def get_resolved_url(self, request=None) -> str:
+        if self.imagen:
+            raw_url = self.imagen.url
+            return request.build_absolute_uri(raw_url) if request else raw_url
+        return self.url or "#CBD5E1"
 
     def __str__(self):
         return f"Imagen {self.orden} de {self.producto.nombre}"

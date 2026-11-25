@@ -41,7 +41,9 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     def get_imagen_url(self, obj) -> str:
         primera = obj.variante.producto.imagenes.first()
-        return primera.url if primera else "#CBD5E1"
+        if not primera:
+            return "#CBD5E1"
+        return primera.get_resolved_url(self.context.get("request"))
 
     def get_subtotal(self, obj) -> int:
         return int(obj.subtotal)

@@ -1,0 +1,123 @@
+<div class="dashboard">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Taller ClickModa</p>
+      <h1 class="page-title">Resumen general</h1>
+    </div>
+    <button type="button" class="btn-refresh" (click)="loadStats()" [disabled]="loading()">
+      {{ loading() ? 'Actualizando…' : 'Actualizar datos' }}
+    </button>
+  </header>
+
+  @if (loading() && !stats()) {
+    <div class="card state-card" aria-busy="true" role="status">
+      Cargando indicadores del taller…
+    </div>
+  } @else if (error()) {
+    <div class="card alert-error" role="alert">
+      <span>✕ {{ error() }}</span>
+      <button type="button" class="btn-retry" (click)="loadStats()">Reintentar</button>
+    </div>
+  } @else if (stats(); as s) {
+    <section aria-labelledby="kpi-section-title" class="kpi-section">
+      <h2 id="kpi-section-title" class="visually-hidden">Indicadores principales</h2>
+
+      <div class="kpi-grid">
+        <article class="card kpi-card">
+          <p class="kpi-label">Total de productos</p>
+          <p class="kpi-value">{{ s.total_productos }}</p>
+          <p class="kpi-sub">
+            <span class="sub-active">✓ {{ s.productos_activos }} activos</span>
+            <span aria-hidden="true">·</span>
+            <span class="sub-soldout">○ {{ s.productos_agotados }} agotados</span>
+          </p>
+        </article>
+
+        <article class="card kpi-card">
+          <p class="kpi-label">Órdenes del día</p>
+          <p class="kpi-value">{{ s.ordenes_hoy }}</p>
+          <p class="kpi-sub">Registradas hoy en Colombia</p>
+        </article>
+
+        <article class="card kpi-card kpi-card--highlight">
+          <p class="kpi-label">Ventas del mes</p>
+          <p class="kpi-value">{{ s.ventas_mes | currency: 'COP' : '$' : '1.0-0' }}</p>
+          <p class="kpi-sub">Órdenes aprobadas y en curso</p>
+        </article>
+
+        <article class="card kpi-card">
+          <p class="kpi-label">Total de usuarios</p>
+          <p class="kpi-value">{{ s.total_usuarios }}</p>
+          <p class="kpi-sub">Cuentas registradas</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="quick-actions-title" class="card actions-card">
+      <h2 id="quick-actions-title" class="section-title">Accesos rápidos</h2>
+      <div class="quick-actions">
+        <a routerLink="/admin/productos" class="action-btn action-btn--primary">
+          + Agregar producto
+        </a>
+        <a routerLink="/admin/ordenes" class="action-btn action-btn--secondary">
+          Ver órdenes
+        </a>
+        <a routerLink="/admin/facturacion" class="action-btn action-btn--accent">
+          Facturación DIAN
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="recent-orders-title" class="card table-card">
+      <div class="table-card__header">
+        <h2 id="recent-orders-title" class="section-title">Órdenes recientes</h2>
+        <a routerLink="/admin/ordenes" class="section-link">Ver todas las órdenes →</a>
+      </div>
+
+      @if (s.ordenes_recientes.length === 0) {
+        <p class="empty-state">Aún no hay órdenes registradas.</p>
+      } @else {
+        <div
+          tabindex="0"
+          role="region"
+          aria-labelledby="recent-orders-caption"
+          class="overflow-x-auto table-wrapper"
+        >
+          <table class="admin-table">
+            <caption id="recent-orders-caption" class="visually-hidden">
+              Últimas 5 órdenes recientes registradas en la tienda
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Orden</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="text-right">Total</th>
+                <th scope="col">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of s.ordenes_recientes; track order.id) {
+                @let badge = getOrderStatus(order.estado);
+                <tr>
+                  <th scope="row" class="cell-id">#{{ order.id }}</th>
+                  <td>{{ order.cliente_nombre }}</td>
+                  <td>
+                    <span class="status-badge" [class]="badge.toneClass">
+                      <span aria-hidden="true">{{ badge.icon }}</span>
+                      <span>{{ badge.label }}</span>
+                    </span>
+                  </td>
+                  <td class="text-right cell-money">
+                    {{ order.total | currency: 'COP' : '$' : '1.0-0' }}
+                  </td>
+                  <td class="cell-date">{{ order.creado_en | date: 'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

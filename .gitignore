@@ -28,3 +28,6 @@ postgres_data/
 .idea/
 Thumbs.db
 Desktop.ini
+
+# Agentes
+.agents/

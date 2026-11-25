@@ -1,8 +1,6 @@
 <!-- Enlace de salto para navegación por teclado -->
-<a
-  href="#cart-content"
-  class="visually-hidden focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-cm-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-cm-black"
->
+<a href="#cart-content"
+  class="visually-hidden focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-cm-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-cm-black">
   Saltar al contenido del carrito
 </a>
 
@@ -27,23 +25,17 @@
     <div class="flex flex-1 items-center justify-end gap-4 sm:flex-initial">
       <div class="hidden w-64 sm:block">
         <label for="header-search-cart" class="visually-hidden">Buscar prendas</label>
-        <input
-          id="header-search-cart"
-          type="search"
-          placeholder="Buscar prendas"
-          readonly
-          routerLink="/"
-          class="w-full cursor-pointer rounded-lg border border-gray-500 bg-white px-3.5 py-2 text-sm text-cm-black placeholder-gray-500"
-        />
+        <input id="header-search-cart" type="search" placeholder="Buscar prendas" readonly routerLink="/"
+          class="w-full cursor-pointer rounded-lg border border-gray-500 bg-white px-3.5 py-2 text-sm text-cm-black placeholder-gray-500" />
       </div>
 
       <nav aria-label="Cuenta y carrito" class="flex items-center gap-4 text-sm font-medium whitespace-nowrap">
         @if (auth.isLoggedIn()) {
-          <a routerLink="/cuenta" class="text-gray-100 hover:text-white">Mi cuenta</a>
+        <a routerLink="/cuenta" class="text-gray-100 hover:text-white">Mi cuenta</a>
         } @else {
-          <a routerLink="/login" [queryParams]="{ returnUrl: '/carrito' }" class="text-gray-100 hover:text-white">
-            Mi cuenta
-          </a>
+        <a routerLink="/login" [queryParams]="{ returnUrl: '/carrito' }" class="text-gray-100 hover:text-white">
+          Mi cuenta
+        </a>
         }
         <a routerLink="/carrito" aria-current="page" class="font-semibold text-cm-amber">
           Carrito ({{ cartService.totalUnits() }})
@@ -61,221 +53,191 @@
 
   <!-- Alertas de stock en tiempo real (RF-07) -->
   @if (stockError()) {
-    <div role="alert" class="cart-alert cart-alert-error mt-4">
-      <span aria-hidden="true">⚠️</span>
-      <span>{{ stockError() }}</span>
-    </div>
+  <div role="alert" class="cart-alert cart-alert-error mt-4">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ stockError() }}</span>
+  </div>
   }
 
   @for (alerta of cart().alertas_stock; track alerta) {
-    <div role="alert" class="cart-alert cart-alert-warning mt-4">
-      <span aria-hidden="true">⚠️</span>
-      <span>{{ alerta }}</span>
-    </div>
+  <div role="alert" class="cart-alert cart-alert-warning mt-4">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ alerta }}</span>
+  </div>
   }
 
   @if (loading()) {
-    <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600" aria-busy="true">
-      Cargando tu carrito…
-    </div>
+  <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600" aria-busy="true">
+    Cargando tu carrito…
+  </div>
   } @else if (cart().items.length === 0) {
-    <section class="mt-6 rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-xs">
-      <h2 class="text-lg font-bold text-cm-black">Tu carrito está vacío</h2>
-      <p class="mt-1 text-sm text-gray-600">
-        Explora nuestra colección y agrega tus prendas favoritas.
-      </p>
-      <a
-        routerLink="/"
-        class="mt-5 inline-block rounded-lg bg-cm-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-      >
-        Ir al catálogo
-      </a>
-    </section>
+  <section class="mt-6 rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-xs">
+    <h2 class="text-lg font-bold text-cm-black">Tu carrito está vacío</h2>
+    <p class="mt-1 text-sm text-gray-600">
+      Explora nuestra colección y agrega tus prendas favoritas.
+    </p>
+    <a routerLink="/"
+      class="mt-5 inline-block rounded-lg bg-cm-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+      Ir al catálogo
+    </a>
+  </section>
   } @else {
-    <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
-      <!-- Lista de productos en el carrito (RF-06) -->
-      <section
-        aria-label="Productos en el carrito"
-        class="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6"
-      >
-        <ul role="list" class="divide-y divide-gray-200 list-none p-0 m-0">
-          @for (item of cart().items; track item.id) {
-            <li class="cart-item-row py-5 first:pt-0 last:pb-0">
-              <div class="flex items-start gap-4">
-                <!-- Miniatura de la prenda -->
-                <div
-                  class="h-20 w-20 shrink-0 rounded-xl border border-gray-200"
-                  [style.background-color]="item.imagen_url"
-                  role="img"
-                  [attr.aria-label]="'Miniatura de ' + item.nombre_producto"
-                ></div>
-
-                <!-- Nombre, talla, color y botón Eliminar -->
-                <div>
-                  <h2 class="text-base font-bold text-cm-black">
-                    {{ item.nombre_producto }}
-                  </h2>
-                  <p class="mt-0.5 text-sm text-gray-600">
-                    {{ item.talla }} · {{ item.color }}
-                  </p>
-                  @if (item.stock_disponible <= 3 && item.stock_disponible > 0) {
-                    <p class="mt-1 text-xs font-semibold text-amber-700">
-                      ¡Últimas {{ item.stock_disponible }} unidades en stock!
-                    </p>
-                  }
-
-                  <button
-                    type="button"
-                    (click)="removeItem(item)"
-                    [disabled]="updatingItemId() === item.id"
-                    [attr.aria-label]="'Eliminar ' + item.nombre_producto + ' talla ' + item.talla"
-                    class="btn-remove mt-2.5"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-
-              <!-- Controles de cantidad y subtotal por línea -->
-              <div class="flex items-center justify-between gap-6 sm:justify-end">
-                <div class="flex items-center gap-3" role="group" [attr.aria-label]="'Cantidad de ' + item.nombre_producto">
-                  <button
-                    type="button"
-                    (click)="changeQuantity(item, -1)"
-                    [disabled]="updatingItemId() === item.id || item.cantidad <= 1"
-                    [attr.aria-label]="'Disminuir cantidad de ' + item.nombre_producto"
-                    class="qty-btn"
-                  >
-                    −
-                  </button>
-
-                  <span class="min-w-6 text-center text-sm font-bold text-cm-black" aria-live="polite">
-                    {{ item.cantidad }}
-                  </span>
-
-                  <button
-                    type="button"
-                    (click)="changeQuantity(item, 1)"
-                    [disabled]="updatingItemId() === item.id || item.cantidad >= item.stock_disponible"
-                    [attr.aria-label]="'Aumentar cantidad de ' + item.nombre_producto"
-                    class="qty-btn"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <span class="min-w-24 text-right text-base font-extrabold text-cm-black">
-                  {{ item.subtotal | currency: 'COP' : '$' : '1.0-0' }}
-                </span>
-              </div>
-            </li>
-          }
-        </ul>
-      </section>
-
-      <!-- Panel lateral de Resumen y Cupones (RF-08, RF-09) -->
-      <aside
-        aria-labelledby="summary-heading"
-        class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs"
-      >
-        <h2 id="summary-heading" class="text-lg font-extrabold text-cm-black">
-          Resumen
-        </h2>
-
-        <dl class="mt-4 space-y-2.5 text-sm">
-          <div class="flex items-center justify-between">
-            <dt class="text-gray-700">Subtotal</dt>
-            <dd class="font-medium text-cm-black">
-              {{ cart().subtotal | currency: 'COP' : '$' : '1.0-0' }}
-            </dd>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <dt class="text-gray-700">Envío</dt>
-            <dd class="font-medium text-cm-black">
-              {{ cart().envio | currency: 'COP' : '$' : '1.0-0' }}
-            </dd>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <dt class="text-gray-700">IVA (19%)</dt>
-            <dd class="font-medium text-cm-black">
-              {{ cart().iva | currency: 'COP' : '$' : '1.0-0' }}
-            </dd>
-          </div>
-
-          <div class="flex items-center justify-between text-cm-blue">
-            <dt class="font-medium">
-              Descuento
-              @if (cart().cupon_codigo) {
-                <span class="ml-1 rounded bg-blue-50 px-1.5 py-0.5 text-xs font-semibold text-cm-blue">
-                  {{ cart().cupon_codigo }}
-                </span>
-              }
-            </dt>
-            <dd class="font-semibold">
-              -{{ cart().descuento | currency: 'COP' : '$' : '1.0-0' }}
-            </dd>
-          </div>
-        </dl>
-
-        <!-- Formulario de cupón (RF-09) -->
-        <form (ngSubmit)="applyCoupon()" class="mt-5" novalidate>
-          <label for="coupon-input" class="visually-hidden">Código de cupón de descuento</label>
-          <div class="flex gap-2">
-            <input
-              id="coupon-input"
-              name="couponCode"
-              type="text"
-              [(ngModel)]="couponCode"
-              (input)="onCouponInput()"
-              placeholder="Código de cupón"
-              aria-describedby="coupon-feedback"
-              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-cm-black placeholder-gray-400 uppercase"
-            />
-            <button
-              type="submit"
-              [disabled]="applyingCoupon()"
-              class="shrink-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-cm-black hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
-            >
-              Aplicar
-            </button>
-          </div>
-
-          <div id="coupon-feedback" aria-live="polite" class="mt-1.5">
-            @if (couponError()) {
-              <p class="text-xs font-medium text-red-700">❌ {{ couponError() }}</p>
+  <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
+    <!-- Lista de productos en el carrito (RF-06) -->
+    <section aria-label="Productos en el carrito"
+      class="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
+      <ul role="list" class="divide-y divide-gray-200 list-none p-0 m-0">
+        @for (item of cart().items; track item.id) {
+        <li class="cart-item-row py-5 first:pt-0 last:pb-0">
+          <div class="flex items-start gap-4">
+            <!-- Miniatura de la prenda -->
+            @if (item.imagen_url && (item.imagen_url.startsWith('http') || item.imagen_url.startsWith('/media/') ||
+            item.imagen_url.startsWith('data:'))) {
+            <img [src]="item.imagen_url" [alt]="'Miniatura de ' + item.nombre_producto"
+              class="h-20 w-20 shrink-0 rounded-xl border border-gray-200 object-cover" />
+            } @else {
+            <div class="h-20 w-20 shrink-0 rounded-xl border border-gray-200"
+              [style.background-color]="item.imagen_url || item.color_hex || '#CBD5E1'" role="img"
+              [attr.aria-label]="'Miniatura de ' + item.nombre_producto"></div>
             }
-            @if (couponMessage() && !couponError()) {
-              <p class="text-xs font-medium text-green-700">✓ {{ couponMessage() }}</p>
-            }
-          </div>
-        </form>
 
-        <div class="my-5 border-t border-gray-200 pt-4">
-          <div class="flex items-center justify-between">
-            <span class="text-lg font-extrabold text-cm-black">Total</span>
-            <span class="text-xl font-extrabold text-cm-black" aria-live="polite">
-              {{ cart().total | currency: 'COP' : '$' : '1.0-0' }}
+            <!-- Nombre, talla, color y botón Eliminar -->
+            <div>
+              <h2 class="text-base font-bold text-cm-black">
+                {{ item.nombre_producto }}
+              </h2>
+              <p class="mt-0.5 text-sm text-gray-600">
+                {{ item.talla }} · {{ item.color }}
+              </p>
+              @if (item.stock_disponible <= 3 && item.stock_disponible> 0) {
+                <p class="mt-1 text-xs font-semibold text-amber-700">
+                  ¡Últimas {{ item.stock_disponible }} unidades en stock!
+                </p>
+                }
+
+                <button type="button" (click)="removeItem(item)" [disabled]="updatingItemId() === item.id"
+                  [attr.aria-label]="'Eliminar ' + item.nombre_producto + ' talla ' + item.talla"
+                  class="btn-remove mt-2.5">
+                  Eliminar
+                </button>
+            </div>
+          </div>
+
+          <!-- Controles de cantidad y subtotal por línea -->
+          <div class="flex items-center justify-between gap-6 sm:justify-end">
+            <div class="flex items-center gap-3" role="group" [attr.aria-label]="'Cantidad de ' + item.nombre_producto">
+              <button type="button" (click)="changeQuantity(item, -1)"
+                [disabled]="updatingItemId() === item.id || item.cantidad <= 1"
+                [attr.aria-label]="'Disminuir cantidad de ' + item.nombre_producto" class="qty-btn">
+                −
+              </button>
+
+              <span class="min-w-6 text-center text-sm font-bold text-cm-black" aria-live="polite">
+                {{ item.cantidad }}
+              </span>
+
+              <button type="button" (click)="changeQuantity(item, 1)"
+                [disabled]="updatingItemId() === item.id || item.cantidad >= item.stock_disponible"
+                [attr.aria-label]="'Aumentar cantidad de ' + item.nombre_producto" class="qty-btn">
+                +
+              </button>
+            </div>
+
+            <span class="min-w-24 text-right text-base font-extrabold text-cm-black">
+              {{ item.subtotal | currency: 'COP' : '$' : '1.0-0' }}
             </span>
           </div>
+        </li>
+        }
+      </ul>
+    </section>
+
+    <!-- Panel lateral de Resumen y Cupones (RF-08, RF-09) -->
+    <aside aria-labelledby="summary-heading" class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs">
+      <h2 id="summary-heading" class="text-lg font-extrabold text-cm-black">
+        Resumen
+      </h2>
+
+      <dl class="mt-4 space-y-2.5 text-sm">
+        <div class="flex items-center justify-between">
+          <dt class="text-gray-700">Subtotal</dt>
+          <dd class="font-medium text-cm-black">
+            {{ cart().subtotal | currency: 'COP' : '$' : '1.0-0' }}
+          </dd>
         </div>
 
-        <div class="flex flex-col gap-3">
-          <button
-            type="button"
-            (click)="goToCheckout()"
-            [disabled]="cart().alertas_stock.length > 0"
-            class="btn-checkout"
-          >
-            Continuar al pago
+        <div class="flex items-center justify-between">
+          <dt class="text-gray-700">Envío</dt>
+          <dd class="font-medium text-cm-black">
+            {{ cart().envio | currency: 'COP' : '$' : '1.0-0' }}
+          </dd>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <dt class="text-gray-700">IVA (19%)</dt>
+          <dd class="font-medium text-cm-black">
+            {{ cart().iva | currency: 'COP' : '$' : '1.0-0' }}
+          </dd>
+        </div>
+
+        <div class="flex items-center justify-between text-cm-blue">
+          <dt class="font-medium">
+            Descuento
+            @if (cart().cupon_codigo) {
+            <span class="ml-1 rounded bg-blue-50 px-1.5 py-0.5 text-xs font-semibold text-cm-blue">
+              {{ cart().cupon_codigo }}
+            </span>
+            }
+          </dt>
+          <dd class="font-semibold">
+            -{{ cart().descuento | currency: 'COP' : '$' : '1.0-0' }}
+          </dd>
+        </div>
+      </dl>
+
+      <!-- Formulario de cupón (RF-09) -->
+      <form (ngSubmit)="applyCoupon()" class="mt-5" novalidate>
+        <label for="coupon-input" class="visually-hidden">Código de cupón de descuento</label>
+        <div class="flex gap-2">
+          <input id="coupon-input" name="couponCode" type="text" [(ngModel)]="couponCode" (input)="onCouponInput()"
+            placeholder="Código de cupón" aria-describedby="coupon-feedback"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-cm-black placeholder-gray-400 uppercase" />
+          <button type="submit" [disabled]="applyingCoupon()"
+            class="shrink-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-cm-black hover:bg-gray-100 disabled:opacity-50 cursor-pointer">
+            Aplicar
           </button>
-
-          <a routerLink="/" class="btn-continue">
-            Seguir comprando
-          </a>
         </div>
-      </aside>
-    </div>
+
+        <div id="coupon-feedback" aria-live="polite" class="mt-1.5">
+          @if (couponError()) {
+          <p class="text-xs font-medium text-red-700">❌ {{ couponError() }}</p>
+          }
+          @if (couponMessage() && !couponError()) {
+          <p class="text-xs font-medium text-green-700">✓ {{ couponMessage() }}</p>
+          }
+        </div>
+      </form>
+
+      <div class="my-5 border-t border-gray-200 pt-4">
+        <div class="flex items-center justify-between">
+          <span class="text-lg font-extrabold text-cm-black">Total</span>
+          <span class="text-xl font-extrabold text-cm-black" aria-live="polite">
+            {{ cart().total | currency: 'COP' : '$' : '1.0-0' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <button type="button" (click)="goToCheckout()" [disabled]="cart().alertas_stock.length > 0"
+          class="btn-checkout">
+          Continuar al pago
+        </button>
+
+        <a routerLink="/" class="btn-continue">
+          Seguir comprando
+        </a>
+      </div>
+    </aside>
+  </div>
   }
 </main>

@@ -144,15 +144,42 @@
 }
 
 .admin__nav a:focus-visible,
+.admin__store-link:focus-visible,
 .admin__logout:focus-visible {
   outline: 3px solid var(--tiza);
   outline-offset: 3px;
 }
 
+/* ---------- Pie de barra lateral: tienda y cierre de sesión ---------- */
+
+.admin__sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.admin__store-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: color 0.18s ease;
+}
+
+.admin__store-link:hover {
+  color: var(--hilo);
+}
+
 /* ---------- Cerrar sesión ---------- */
 
 .admin__logout {
-  margin-top: auto;
   align-self: flex-start;
   padding: 0.55rem 1rem;
   font: inherit;
@@ -179,13 +206,40 @@
 .admin__main {
   position: relative;
   flex: 1;
-  padding: calc(var(--tape) + 2.5rem) clamp(1.25rem, 5vw, 4rem) 3rem;
+  min-width: 0;
+  padding: calc(var(--tape) + 1.5rem) clamp(1.25rem, 4vw, 3rem) 2.5rem;
   background:
     linear-gradient(var(--trazo) 1px, transparent 1px) 0 0 / 100% 120px,
     linear-gradient(90deg, var(--trazo) 1px, transparent 1px) 0 0 / 120px 100%,
     linear-gradient(rgba(27, 42, 92, 0.04) 1px, transparent 1px) 0 0 / 100% 24px,
     linear-gradient(90deg, rgba(27, 42, 92, 0.04) 1px, transparent 1px) 0 0 / 24px 100%,
     var(--papel);
+}
+
+.admin__skip-link:focus {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 50;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  background: var(--hilo);
+  color: var(--denim-deep);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin__topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin__content {
+  min-width: 0;
 }
 
 /* cinta métrica: el gesto memorable */
@@ -250,23 +304,34 @@
     conic-gradient(from -45deg at 50% 0, var(--tiza) 0 90deg, transparent 0) bottom / 100% 8px no-repeat;
 }
 
-/* ---------- Sesión: pieza de patrón con muescas ---------- */
+/* ---------- Sesión: pieza de patrón compacta ---------- */
 
 .admin__session {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
   max-width: 100%;
   margin: 0;
-  padding: 0.9rem 1.4rem 0.9rem 1.2rem;
+  padding: 0.5rem 1.05rem;
+  font-size: 0.875rem;
   font-weight: 500;
   overflow-wrap: anywhere;
   background: #fff;
-  border: 2px dashed var(--denim);
-  /* muescas triangulares en las esquinas, como marcas de corte */
-  clip-path: polygon(
-    0 0, calc(100% - 0.9rem) 0, 100% 0.9rem,
-    100% 100%, 0.9rem 100%, 0 calc(100% - 0.9rem)
-  );
+  border: 1.5px dashed rgba(27, 42, 92, 0.45);
+  border-radius: 0.65rem;
+}
+
+.admin__session-role {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--denim-deep);
+  background: var(--hilo);
+  border-radius: 999px;
 }
 
 /* ---------- Responsive: la barra pasa a ser una tira superior ---------- */
@@ -295,6 +360,15 @@
     grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   }
 
+  .admin__sidebar-footer {
+    margin-top: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
   .admin__logout {
     margin-top: 0;
   }
@@ -309,6 +383,7 @@
 
   .admin__nav li,
   .admin__nav a,
+  .admin__store-link,
   .admin__logout {
     transition: none;
   }

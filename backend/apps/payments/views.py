@@ -29,7 +29,7 @@ class PaymentWebhookSimulatorView(APIView):
         )
 
         orden_actualizada = (
-            Order.objects.select_related("direccion_envio", "payment")
+            Order.objects.select_related("direccion_envio", "payment", "factura")
             .prefetch_related("items")
             .get(pk=orden.pk)
         )

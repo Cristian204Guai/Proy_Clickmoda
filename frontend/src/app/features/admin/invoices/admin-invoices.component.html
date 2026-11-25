@@ -1,0 +1,402 @@
+<div class="invoices-page">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">DIAN · UBL 2.1</p>
+      <h1 class="page-title">Facturación electrónica</h1>
+    </div>
+    <p class="total-pill">{{ totalCount() }} facturas emitidas</p>
+  </header>
+
+  <section aria-labelledby="invoices-filter-title" class="card filter-card">
+    <h2 id="invoices-filter-title" class="visually-hidden">Filtrar facturas DIAN</h2>
+    <search>
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filter-form">
+        <div class="field field--grow">
+          <label for="invoices-search">Buscar factura, CUFE, documento o cliente</label>
+          <input
+            id="invoices-search"
+            name="search"
+            type="search"
+            formControlName="search"
+            placeholder="Número, CUFE, documento o cliente"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
+            enterkeyhint="search"
+          />
+        </div>
+
+        <div class="field">
+          <label for="invoices-dian-status">Estado DIAN</label>
+          <select
+            id="invoices-dian-status"
+            name="estado_respuesta"
+            formControlName="estado_respuesta"
+          >
+            <option value="">Todos los estados</option>
+            <option value="APROBADA">APROBADA</option>
+            <option value="LISTO">LISTO</option>
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="ERROR">ERROR</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn--primary" [disabled]="loading()">
+            Filtrar
+          </button>
+          <button type="button" class="btn btn--secondary" (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </form>
+    </search>
+  </section>
+
+  @if (actionError()) {
+    <div class="card alert alert--error" role="alert">
+      <span>✕ {{ actionError() }}</span>
+    </div>
+  }
+
+  @if (detailError()) {
+    <div class="card alert alert--error" role="alert">
+      <span>✕ {{ detailError() }}</span>
+    </div>
+  }
+
+  <div aria-live="polite" role="status">
+    @if (actionMessage()) {
+      <div class="card alert alert--success">
+        <span>✓ {{ actionMessage() }}</span>
+      </div>
+    }
+  </div>
+
+  <section aria-labelledby="invoices-list-title" class="card table-card">
+    <h2 id="invoices-list-title" class="section-title">Listado de facturas</h2>
+
+    @if (loading()) {
+      <p class="state-message" aria-busy="true" role="status">Cargando facturas electrónicas…</p>
+    } @else if (error()) {
+      <div class="alert alert--error" role="alert">
+        <span>✕ {{ error() }}</span>
+        <button type="button" class="btn btn--secondary" (click)="loadInvoices()">
+          Reintentar
+        </button>
+      </div>
+    } @else if (invoices().length === 0) {
+      <p class="state-message">No hay facturas que coincidan con tu búsqueda.</p>
+    } @else {
+      <div
+        tabindex="0"
+        role="region"
+        aria-labelledby="invoices-table-caption"
+        class="overflow-x-auto table-wrapper"
+      >
+        <table class="admin-table">
+          <caption id="invoices-table-caption" class="visually-hidden">
+            Facturas electrónicas DIAN con adquirente, total, estado y acciones
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Factura</th>
+              <th scope="col">Orden</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Adquirente</th>
+              <th scope="col" class="text-right">Total</th>
+              <th scope="col">Estado DIAN</th>
+              <th scope="col" class="text-center">Correos</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inv of invoices(); track inv.id) {
+              @let badge = getDianMeta(inv.estado_respuesta);
+              <tr>
+                <th scope="row" class="cell-num">{{ inv.numero }}</th>
+                <td class="cell-order">#{{ inv.orden }}</td>
+                <td class="cell-date">{{ inv.fecha_emision | date: 'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="client-cell">
+                    <span class="client-name">{{ inv.adquiriente_nombre }}</span>
+                    <span class="client-doc">
+                      {{ inv.adquiriente_tipo_documento }} {{ inv.adquiriente_documento }}
+                    </span>
+                    <span class="client-mail">{{ inv.adquiriente_correo || 'Sin correo' }}</span>
+                  </div>
+                </td>
+                <td class="text-right cell-money">
+                  {{ inv.total | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+                <td>
+                  <div class="dian-cell">
+                    <span class="dian-badge" [class]="badge.toneClass">
+                      <span aria-hidden="true">{{ badge.icon }}</span>
+                      <span>{{ badge.label }}</span>
+                    </span>
+                    <span class="dian-sub">{{ inv.estado }}</span>
+                  </div>
+                </td>
+                <td class="text-center">{{ inv.correos_enviados }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="btn-row btn-row--detail"
+                      [attr.aria-label]="'Ver detalle de factura ' + inv.numero"
+                      (click)="openDetail(inv)"
+                    >
+                      Ver detalle
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-row"
+                      [disabled]="isBusy(inv.id, 'pdf')"
+                      [attr.aria-label]="'Descargar PDF de factura ' + inv.numero"
+                      (click)="downloadFile(inv, 'pdf')"
+                    >
+                      {{ isBusy(inv.id, 'pdf') ? 'PDF…' : 'Descargar PDF' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-row"
+                      [disabled]="isBusy(inv.id, 'xml')"
+                      [attr.aria-label]="'Descargar XML de factura ' + inv.numero"
+                      (click)="downloadFile(inv, 'xml')"
+                    >
+                      {{ isBusy(inv.id, 'xml') ? 'XML…' : 'Descargar XML' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-row btn-row--accent"
+                      [disabled]="isBusy(inv.id, 'email')"
+                      [attr.aria-label]="'Reenviar por correo factura ' + inv.numero"
+                      (click)="resendEmail(inv)"
+                    >
+                      {{ isBusy(inv.id, 'email') ? 'Enviando…' : 'Reenviar por correo' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Paginación de facturas">
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            Anterior
+          </button>
+          <div class="page-list">
+            @for (page of pageNumbers(); track page) {
+              <button
+                type="button"
+                class="page-btn"
+                [class.page-btn--current]="page === currentPage()"
+                [attr.aria-current]="page === currentPage() ? 'page' : null"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </nav>
+      }
+    }
+  </section>
+
+  @if (detailLoading()) {
+    <section class="card detail-card" aria-busy="true" role="status">
+      Cargando detalle completo de la factura…
+    </section>
+  } @else if (selectedInvoice(); as detail) {
+    <section
+      aria-labelledby="invoice-detail-heading"
+      class="card detail-card"
+    >
+      <div class="detail-header">
+        <div>
+          <p class="page-eyebrow">Detalle electrónico completo</p>
+          <h2 id="invoice-detail-heading" #detailHeading tabindex="-1" class="detail-title">
+            Factura {{ detail.numero }} · Orden #{{ detail.orden }}
+          </h2>
+          <p class="detail-meta">
+            Emitida el {{ detail.fecha_emision | date: 'dd/MM/yyyy HH:mm' }} ·
+            {{ detail.emisor_razon_social }} (NIT {{ detail.emisor_nit }}-{{ detail.emisor_dv }})
+          </p>
+        </div>
+        <div class="detail-header-actions">
+          <a [routerLink]="['/factura', detail.id]" class="btn btn--secondary detail-link">
+            Abrir en /factura/{{ detail.id }}
+          </a>
+          <button type="button" class="btn btn--secondary" (click)="closeDetail()">
+            Cerrar detalle
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-box">
+          <h3 class="detail-subtitle">Adquirente y pago</h3>
+          <p><strong>{{ detail.adquiriente_nombre }}</strong></p>
+          <p>{{ detail.adquiriente_tipo_documento }}: {{ detail.adquiriente_documento }}</p>
+          <p>{{ detail.adquiriente_correo || 'Sin correo registrado' }}</p>
+          <p>Pago: {{ detail.metodo_pago_label }}</p>
+        </div>
+
+        <div class="detail-box">
+          <h3 class="detail-subtitle">Estados ante la DIAN (4 etapas)</h3>
+          <ul class="dian-steps" role="list">
+            @let xmlBadge = getDianMeta(detail.estado_xml);
+            @let firmaBadge = getDianMeta(detail.estado_firma);
+            @let envioBadge = getDianMeta(detail.estado_envio);
+            @let respBadge = getDianMeta(detail.estado_respuesta);
+            <li>
+              <span>1. Generación XML</span>
+              <span class="dian-badge" [class]="xmlBadge.toneClass">
+                <span aria-hidden="true">{{ xmlBadge.icon }}</span>
+                <span>{{ xmlBadge.label }}</span>
+              </span>
+            </li>
+            <li>
+              <span>2. Firma digital</span>
+              <span class="dian-badge" [class]="firmaBadge.toneClass">
+                <span aria-hidden="true">{{ firmaBadge.icon }}</span>
+                <span>{{ firmaBadge.label }}</span>
+              </span>
+            </li>
+            <li>
+              <span>3. Envío a DIAN</span>
+              <span class="dian-badge" [class]="envioBadge.toneClass">
+                <span aria-hidden="true">{{ envioBadge.icon }}</span>
+                <span>{{ envioBadge.label }}</span>
+              </span>
+            </li>
+            <li>
+              <span>4. Respuesta DIAN</span>
+              <span class="dian-badge" [class]="respBadge.toneClass">
+                <span aria-hidden="true">{{ respBadge.icon }}</span>
+                <span>{{ respBadge.label }}</span>
+              </span>
+            </li>
+          </ul>
+          @if (detail.mensaje_respuesta_dian) {
+            <p class="dian-msg">
+              <strong>Respuesta ({{ detail.codigo_respuesta_dian || 'DIAN' }}):</strong>
+              {{ detail.mensaje_respuesta_dian }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <div
+        tabindex="0"
+        role="region"
+        aria-labelledby="detail-lines-caption"
+        class="overflow-x-auto table-wrapper detail-lines"
+      >
+        <table class="admin-table">
+          <caption id="detail-lines-caption" class="visually-hidden">
+            Líneas de producto e impuestos discriminados de la factura {{ detail.numero }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Descripción</th>
+              <th scope="col" class="text-center">Cant.</th>
+              <th scope="col" class="text-right">Unit. sin IVA</th>
+              <th scope="col" class="text-right">Base</th>
+              <th scope="col" class="text-right">% IVA</th>
+              <th scope="col" class="text-right">IVA</th>
+              <th scope="col" class="text-right">Total línea</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of detail.detalle_lineas; track $index) {
+              <tr>
+                <th scope="row" class="line-desc">{{ line.descripcion }}</th>
+                <td class="text-center">{{ line.cantidad }}</td>
+                <td class="text-right">
+                  {{ line.valor_unitario_sin_iva | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+                <td class="text-right">
+                  {{ line.base_linea | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+                <td class="text-right">{{ line.porcentaje_iva }}%</td>
+                <td class="text-right">
+                  {{ line.iva_linea | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+                <td class="text-right cell-money">
+                  {{ line.total_linea | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="detail-footer">
+        <div class="detail-box detail-cufe">
+          <h3 class="detail-subtitle">CUFE y Resolución DIAN</h3>
+          <p class="cufe-code"><strong>CUFE:</strong> {{ detail.cufe }}</p>
+          @if (detail.track_id) {
+            <p><strong>Track ID:</strong> {{ detail.track_id }}</p>
+          }
+          <p>
+            <strong>Resolución:</strong> {{ detail.resolucion.numero_resolucion }} ·
+            Ambiente: {{ detail.resolucion.ambiente }}
+          </p>
+          <p>
+            <strong>Rango autorizado:</strong> {{ detail.resolucion.rango_autorizado_texto }}
+            ({{ detail.resolucion.fecha_desde | date: 'dd/MM/yyyy' }} a
+            {{ detail.resolucion.fecha_hasta | date: 'dd/MM/yyyy' }})
+          </p>
+          <p><strong>Correos enviados:</strong> {{ detail.correos_enviados }}</p>
+        </div>
+
+        <dl class="detail-box totals-list">
+          <div>
+            <dt>Subtotal bruto</dt>
+            <dd>{{ detail.subtotal_bruto | currency: 'COP' : '$' : '1.0-0' }}</dd>
+          </div>
+          @if (detail.descuento > 0) {
+            <div>
+              <dt>Descuento</dt>
+              <dd>-{{ detail.descuento | currency: 'COP' : '$' : '1.0-0' }}</dd>
+            </div>
+          }
+          <div>
+            <dt>Base gravable</dt>
+            <dd>{{ detail.base_gravable | currency: 'COP' : '$' : '1.0-0' }}</dd>
+          </div>
+          <div>
+            <dt>IVA discriminado</dt>
+            <dd>{{ detail.iva | currency: 'COP' : '$' : '1.0-0' }}</dd>
+          </div>
+          <div>
+            <dt>Envío</dt>
+            <dd>{{ detail.envio | currency: 'COP' : '$' : '1.0-0' }}</dd>
+          </div>
+          <div class="totals-grand">
+            <dt>Total factura</dt>
+            <dd>{{ detail.total | currency: 'COP' : '$' : '1.0-0' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  }
+</div>

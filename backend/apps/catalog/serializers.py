@@ -15,9 +15,18 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+    es_archivo = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
-        fields = ("id", "url", "orden")
+        fields = ("id", "url", "orden", "es_archivo")
+
+    def get_url(self, obj) -> str:
+        return obj.get_resolved_url(self.context.get("request"))
+
+    def get_es_archivo(self, obj) -> bool:
+        return bool(obj.imagen)
 
 
 class ProductSerializer(serializers.ModelSerializer):

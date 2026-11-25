@@ -24,7 +24,7 @@ def get_or_create_active_cart(request) -> Cart:
     return cart
 
 
-def serialize_cart(cart: Cart) -> dict:
+def serialize_cart(cart: Cart, request=None) -> dict:
     cart_prefetched = (
         Cart.objects.select_related("cupon")
         .prefetch_related(
@@ -32,7 +32,8 @@ def serialize_cart(cart: Cart) -> dict:
         )
         .get(pk=cart.pk)
     )
-    return CartSerializer(cart_prefetched).data
+    context = {"request": request} if request is not None else {}
+    return CartSerializer(cart_prefetched, context=context).data
 
 
 class CartDetailView(APIView):
@@ -40,7 +41,7 @@ class CartDetailView(APIView):
 
     def get(self, request):
         cart = get_or_create_active_cart(request)
-        return Response(serialize_cart(cart))
+        return Response(serialize_cart(cart, request))
 
 
 class CartItemCreateView(APIView):
@@ -87,7 +88,7 @@ class CartItemCreateView(APIView):
 
         item.cantidad = nueva_cantidad
         item.save()
-        return Response(serialize_cart(cart), status=status.HTTP_200_OK)
+        return Response(serialize_cart(cart, request), status=status.HTTP_200_OK)
 
 
 class CartItemDetailView(APIView):
@@ -104,7 +105,7 @@ class CartItemDetailView(APIView):
 
         if cantidad <= 0:
             item.delete()
-            return Response(serialize_cart(cart), status=status.HTTP_200_OK)
+            return Response(serialize_cart(cart, request), status=status.HTTP_200_OK)
 
         if item.variante.stock == 0:
             return Response(
@@ -127,13 +128,13 @@ class CartItemDetailView(APIView):
 
         item.cantidad = cantidad
         item.save()
-        return Response(serialize_cart(cart), status=status.HTTP_200_OK)
+        return Response(serialize_cart(cart, request), status=status.HTTP_200_OK)
 
     def delete(self, request, pk: int):
         cart = get_or_create_active_cart(request)
         item = get_object_or_404(CartItem, pk=pk, cart=cart)
         item.delete()
-        return Response(serialize_cart(cart), status=status.HTTP_200_OK)
+        return Response(serialize_cart(cart, request), status=status.HTTP_200_OK)
 
 
 class CartCouponView(APIView):
@@ -146,7 +147,7 @@ class CartCouponView(APIView):
         if not codigo:
             cart.cupon = None
             cart.save(update_fields=["cupon"])
-            return Response(serialize_cart(cart), status=status.HTTP_200_OK)
+            return Response(serialize_cart(cart, request), status=status.HTTP_200_OK)
 
         cupon = Coupon.objects.filter(codigo__iexact=codigo).first()
         if not cupon:
@@ -161,7 +162,7 @@ class CartCouponView(APIView):
 
         cart.cupon = cupon
         cart.save(update_fields=["cupon"])
-        return Response(serialize_cart(cart), status=status.HTTP_200_OK)
+        return Response(serialize_cart(cart, request), status=status.HTTP_200_OK)
 
 
 class CartMergeView(APIView):
@@ -214,4 +215,4 @@ class CartMergeView(APIView):
                 u_item.cantidad = min(u_item.cantidad + cant, variante.stock)
                 u_item.save()
 
-        return Response(serialize_cart(user_cart), status=status.HTTP_200_OK)
+        return Response(serialize_cart(user_cart, request), status=status.HTTP_200_OK)

@@ -5,9 +5,9 @@ from rest_framework.exceptions import ValidationError
 from apps.cart.models import Cart
 from apps.catalog.models import ProductVariant
 from apps.coupons.models import Coupon
+from apps.invoices.services import emitir_factura_para_orden
 from apps.orders.models import Order
 from .models import Payment
-from apps.invoices.services import emitir_factura_para_orden
 
 
 
@@ -104,8 +104,7 @@ def procesar_confirmacion_pago(
         orden.stock_descontado = True
         orden.save(update_fields=["estado", "stock_descontado"])
 
-        # Emitir automaticamente la factura electronica DIAN simulada
-
+        # Emitir automáticamente la factura electrónica DIAN simulada (RF-17)
         emitir_factura_para_orden(orden)
 
 
