@@ -1,63 +1,142 @@
 <!-- Enlace de salto para navegación por teclado -->
 <a href="#content"
-  class="visually-hidden focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-cm-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-cm-black">
+  class="visually-hidden focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-cm-amber focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-cm-black focus:shadow-lg">
   Saltar al contenido principal
 </a>
 
 <!-- Encabezado principal -->
-<header class="bg-cm-dark-gray text-white">
-  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+<header class="bg-cm-dark-gray text-white shadow-sm">
+  <!-- Barra superior de navegación -->
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
     <div class="flex items-center gap-8">
-      <a routerLink="/" class="text-2xl font-extrabold tracking-tight text-white">
-        Click<span class="text-cm-amber">Moda</span>
+      <a routerLink="/" class="group inline-flex items-center gap-1.5 text-2xl font-extrabold tracking-tight text-white">
+        <span>Click<span class="text-cm-amber">Moda</span></span>
+        <span class="hidden rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-gray-300 uppercase sm:inline-block">
+          CO
+        </span>
       </a>
 
       <nav aria-label="Categorías destacadas" class="hidden md:block">
         <ul class="flex items-center gap-6 text-sm font-medium text-gray-200">
-          <li><button type="button" (click)="quickFilterSearch('')"
-              class="hover:text-white cursor-pointer">Mujer</button></li>
-          <li><button type="button" (click)="quickFilterSearch('')"
-              class="hover:text-white cursor-pointer">Hombre</button></li>
-          <li><button type="button" (click)="quickFilterSearch('')"
-              class="hover:text-white cursor-pointer">Niños</button></li>
-          <li><button type="button" (click)="quickOrdering('precio_base')"
-              class="hover:text-cm-amber cursor-pointer">Ofertas</button></li>
+          <li>
+            <button type="button" (click)="quickFilterSearch('')"
+              class="cm-nav-link py-1 text-gray-200 hover:text-white cursor-pointer">
+              Mujer
+            </button>
+          </li>
+          <li>
+            <button type="button" (click)="quickFilterSearch('')"
+              class="cm-nav-link py-1 text-gray-200 hover:text-white cursor-pointer">
+              Hombre
+            </button>
+          </li>
+          <li>
+            <button type="button" (click)="quickFilterSearch('')"
+              class="cm-nav-link py-1 text-gray-200 hover:text-white cursor-pointer">
+              Niños
+            </button>
+          </li>
+          <li>
+            <button type="button" (click)="quickOrdering('precio_base')"
+              class="cm-nav-link inline-flex items-center gap-1.5 py-1 font-semibold text-cm-amber hover:text-amber-300 cursor-pointer">
+              <span class="h-1.5 w-1.5 rounded-full bg-cm-amber" aria-hidden="true"></span>
+              Ofertas
+            </button>
+          </li>
         </ul>
       </nav>
     </div>
 
     <!-- Buscador por texto (RF-03) y enlaces de usuario -->
-    <div class="flex flex-1 items-center justify-end gap-4 sm:flex-initial">
-      <form (ngSubmit)="applyFilters()" role="search" class="w-full max-w-xs sm:w-64">
+    <div class="flex flex-1 items-center justify-end gap-3 sm:flex-initial sm:gap-4">
+      <form (ngSubmit)="applyFilters()" role="search" class="relative w-full max-w-xs sm:w-72">
         <label for="catalog-search" class="visually-hidden">Buscar prendas por nombre o descripción</label>
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor"
+          class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400">
+          <path fill-rule="evenodd"
+            d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+            clip-rule="evenodd" />
+        </svg>
         <input id="catalog-search" name="search" type="search" [(ngModel)]="searchText" (search)="applyFilters()"
-          placeholder="Buscar prendas"
-          class="w-full rounded-lg border border-gray-500 bg-white px-3.5 py-2 text-sm text-cm-black placeholder-gray-500" />
+          placeholder="Buscar prendas, estilos..."
+          class="w-full rounded-xl border border-gray-600/80 bg-white py-2 pr-3.5 pl-9 text-base text-cm-black placeholder-gray-500 shadow-2xs sm:text-sm" />
       </form>
 
-      <nav aria-label="Cuenta y carrito" class="flex items-center gap-4 text-sm font-medium whitespace-nowrap">
+      <nav aria-label="Cuenta y carrito" class="flex items-center gap-3 text-sm font-medium whitespace-nowrap sm:gap-4">
         @if (auth.isLoggedIn()) {
-        <a routerLink="/cuenta" class="text-gray-100 hover:text-white">Mi cuenta</a>
+        <a routerLink="/cuenta"
+          class="cm-pressable inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-gray-100 hover:bg-white/10 hover:text-white">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-300">
+            <path
+              d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" />
+          </svg>
+          <span>Mi cuenta</span>
+        </a>
         @if (auth.isAdmin()) {
-        <a routerLink="/admin" class="rounded bg-cm-blue px-2.5 py-1 text-white hover:bg-blue-500">Admin</a>
+        <a routerLink="/admin"
+          class="cm-btn-primary rounded-lg bg-cm-blue px-3 py-1.5 text-xs font-semibold tracking-wide text-white hover:bg-blue-500">
+          Admin
+        </a>
         }
         } @else {
-        <a routerLink="/login" class="text-gray-100 hover:text-white">Mi cuenta</a>
+        <a routerLink="/login"
+          class="cm-pressable inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-gray-100 hover:bg-white/10 hover:text-white">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-300">
+            <path
+              d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" />
+          </svg>
+          <span>Mi cuenta</span>
+        </a>
         }
-        <a routerLink="/carrito" class="font-semibold text-cm-amber hover:underline">
-          Carrito ({{ cartCount() }})
+        <a routerLink="/carrito"
+          class="cm-pressable inline-flex items-center gap-2 rounded-xl bg-cm-amber/15 px-3.5 py-1.5 font-semibold text-cm-amber ring-1 ring-cm-amber/40 hover:bg-cm-amber/25">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+            <path fill-rule="evenodd"
+              d="M6 5v1H4.667a1.75 1.75 0 0 0-1.743 1.598l-.826 9.5A1.75 1.75 0 0 0 3.84 19H16.16a1.75 1.75 0 0 0 1.743-1.902l-.826-9.5A1.75 1.75 0 0 0 15.333 6H14V5a4 4 0 0 0-8 0Zm4-2.5A2.5 2.5 0 0 0 7.5 5v1h5V5A2.5 2.5 0 0 0 10 2.5ZM7.5 10a2.5 2.5 0 0 0 5 0V8.75a.75.75 0 0 1 1.5 0V10a4 4 0 0 1-8 0V8.75a.75.75 0 0 1 1.5 0V10Z"
+              clip-rule="evenodd" />
+          </svg>
+          <span class="tabular-nums">Carrito ({{ cartCount() }})</span>
         </a>
       </nav>
     </div>
   </div>
 
-  <!-- Banner Hero -->
-  <div class="border-t border-gray-700/80">
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">Nueva colección</h1>
-      <p class="mt-1 max-w-prose text-sm text-gray-300 sm:text-base">
-        Moda para cada día, con envíos a toda Colombia.
-      </p>
+  <!-- Banner Hero Editorial -->
+  <div class="border-t border-gray-800 bg-gradient-to-b from-cm-dark-gray to-gray-900">
+    <div class="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-4 py-7 sm:flex-row sm:items-end sm:px-6 lg:px-8">
+      <div>
+        <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide text-cm-amber">
+          <span class="h-1.5 w-1.5 rounded-full bg-cm-amber" aria-hidden="true"></span>
+          Temporada 2026 · Diseño Esencial
+        </div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl">
+          Nueva colección
+        </h1>
+        <p class="mt-1.5 max-w-xl text-sm leading-relaxed text-gray-300 sm:text-base">
+          Moda para cada día, con envíos a toda Colombia.
+        </p>
+      </div>
+
+      <!-- Indicadores de confianza comercial -->
+      <div class="flex flex-wrap items-center gap-3 text-xs font-medium text-gray-300">
+        <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 ring-1 ring-white/10">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-cm-amber">
+            <path
+              d="M6.5 3c-1.051 0-2.093.04-3.125.117A1.49 1.49 0 0 0 2 4.607V10.5h9V4.606c0-.771-.59-1.43-1.375-1.489A41.568 41.568 0 0 0 6.5 3ZM2 12v2.5A1.5 1.5 0 0 0 3.5 16h.041a3 3 0 0 1 5.918 0h.791a.75.75 0 0 0 .75-.75V12H2Z" />
+            <path
+              d="M6.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM13.25 5a.75.75 0 0 0-.75.75v8.514a3.001 3.001 0 0 1 4.893 1.44c.37-.275.61-.719.595-1.227a24.905 24.905 0 0 0-1.784-8.549A1.486 1.486 0 0 0 14.823 5H13.25ZM14.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+          </svg>
+          Envíos nacionales
+        </span>
+        <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 ring-1 ring-white/10">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-cm-amber">
+            <path fill-rule="evenodd"
+              d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+              clip-rule="evenodd" />
+          </svg>
+          Precios con IVA
+        </span>
+      </div>
     </div>
   </div>
 </header>
@@ -65,32 +144,41 @@
 <!-- Contenido principal -->
 <main id="content" tabindex="-1" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
   <!-- Botón mostrar/ocultar filtros en móvil (Mobile-first) -->
-  <div class="mb-4 flex items-center justify-between lg:hidden">
+  <div class="mb-5 flex items-center justify-between lg:hidden">
     <button type="button" (click)="mobileFiltersOpen.set(!mobileFiltersOpen())"
       [attr.aria-expanded]="mobileFiltersOpen()" aria-controls="sidebar-filters"
-      class="inline-flex items-center gap-2 rounded-lg border border-gray-400 bg-white px-4 py-2 text-sm font-semibold text-cm-black shadow-xs">
+      class="cm-pressable inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-cm-black shadow-2xs hover:border-gray-400 cursor-pointer">
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-cm-blue">
+        <path
+          d="M10 3.75a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM17.25 4.5a.75.75 0 0 0 0-1.5h-5.5a.75.75 0 0 0 0 1.5h5.5ZM5 3.75a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75ZM4.25 17a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5ZM17.25 17a.75.75 0 0 0 0-1.5h-5.5a.75.75 0 0 0 0 1.5h5.5ZM9 10a.75.75 0 0 1-.75.75h-5.5a.75.75 0 0 1 0-1.5h5.5A.75.75 0 0 1 9 10ZM17.25 10.75a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5ZM14 10a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM10 16.25a2 2 0 1 0-4 0 2 2 0 0 0 4 0Z" />
+      </svg>
       <span>{{ mobileFiltersOpen() ? 'Ocultar filtros' : 'Mostrar filtros' }}</span>
     </button>
   </div>
 
-  <div class="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr] lg:items-start">
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-[272px_1fr] lg:items-start">
     <!-- Barra lateral de filtros (RF-02) -->
     <aside id="sidebar-filters" aria-label="Filtros de productos" [class.hidden]="!mobileFiltersOpen()"
-      class="rounded-2xl border border-gray-300 bg-white p-5 shadow-xs lg:block">
+      class="rounded-2xl border border-gray-200/90 bg-white p-5 shadow-xs lg:sticky lg:top-6 lg:block">
       <form (ngSubmit)="applyFilters()" novalidate>
-        <h2 class="text-lg font-bold text-cm-black">Filtros</h2>
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3.5">
+          <h2 class="text-base font-bold tracking-tight text-cm-black">Filtros</h2>
+          <span class="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600">
+            Catálogo
+          </span>
+        </div>
 
         <!-- Categoría -->
         <fieldset class="mt-4 border-0 p-0">
-          <legend class="text-xs font-semibold text-gray-700">Categoría</legend>
-          <ul role="list" class="mt-2 space-y-2 list-none p-0">
+          <legend class="text-xs font-bold tracking-wider text-gray-500 uppercase">Categoría</legend>
+          <ul role="list" class="mt-2.5 space-y-1.5 list-none p-0">
             @for (cat of categories(); track cat.id) {
             <li>
               <label [for]="'cat-' + cat.slug"
-                class="brand-checkbox-label flex cursor-pointer items-center gap-2.5 text-sm text-cm-black">
+                class="brand-checkbox-label flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm font-medium text-cm-black hover:bg-gray-50">
                 <input type="checkbox" [id]="'cat-' + cat.slug" [checked]="selectedCategories().includes(cat.slug)"
-                  (change)="toggleCategory(cat.slug)" class="brand-checkbox h-4 w-4 rounded border-gray-500" />
-                <span>{{ cat.nombre }}</span>
+                  (change)="toggleCategory(cat.slug)" class="brand-checkbox h-4 w-4 rounded border-gray-400" />
+                <span class="truncate">{{ cat.nombre }}</span>
               </label>
             </li>
             }
@@ -98,16 +186,16 @@
         </fieldset>
 
         <!-- Talla (XS a XL) -->
-        <fieldset class="mt-6 border-0 p-0">
-          <legend class="text-xs font-semibold text-gray-700">Talla</legend>
-          <div class="mt-2 flex flex-wrap gap-2">
+        <fieldset class="mt-6 border-t border-gray-100 pt-5 border-x-0 border-b-0 p-0">
+          <legend class="text-xs font-bold tracking-wider text-gray-500 uppercase">Talla</legend>
+          <div class="mt-2.5 grid grid-cols-5 gap-1.5">
             @for (size of sizes; track size) {
             <button type="button" (click)="toggleSize(size)" [attr.aria-pressed]="selectedSize() === size" [class]="
                       selectedSize() === size
-                        ? 'border-cm-blue bg-cm-blue text-white'
-                        : 'border-gray-400 bg-white text-cm-black hover:border-cm-black'
+                        ? 'border-cm-blue bg-cm-blue text-white shadow-2xs'
+                        : 'border-gray-300 bg-white text-cm-black hover:border-gray-500 hover:bg-gray-50'
                     "
-              class="min-w-10 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer">
+              class="flex h-9 items-center justify-center rounded-lg border text-xs font-bold cursor-pointer">
               {{ size }}
             </button>
             }
@@ -115,19 +203,19 @@
         </fieldset>
 
         <!-- Selector de Color (No depende solo del color: incluye check y borde de alto contraste) -->
-        <fieldset class="mt-6 border-0 p-0">
-          <legend class="text-xs font-semibold text-gray-700">Color</legend>
-          <div class="mt-2 flex flex-wrap items-center gap-3">
+        <fieldset class="mt-6 border-t border-gray-100 pt-5 border-x-0 border-b-0 p-0">
+          <legend class="text-xs font-bold tracking-wider text-gray-500 uppercase">Color</legend>
+          <div class="mt-2.5 flex flex-wrap items-center gap-3">
             @for (color of colors; track color.name) {
             <button type="button" (click)="toggleColor(color.name)" [attr.aria-label]="'Color ' + color.name"
               [attr.aria-pressed]="selectedColor() === color.name" [style.background-color]="color.hex"
               [class]="color.borderClass"
-              class="relative flex h-7 w-7 items-center justify-center rounded-full border-2 transition-transform cursor-pointer"
+              class="relative flex h-8 w-8 items-center justify-center rounded-full border-2 shadow-2xs cursor-pointer"
               [class.ring-3]="selectedColor() === color.name" [class.ring-cm-blue]="selectedColor() === color.name"
               [class.ring-offset-2]="selectedColor() === color.name">
               @if (selectedColor() === color.name) {
               <span aria-hidden="true" [class]="color.name === 'Blanco' ? 'text-cm-black' : 'text-white'"
-                class="text-xs font-bold leading-none">
+                class="text-xs font-extrabold leading-none">
                 ✓
               </span>
               }
@@ -137,32 +225,34 @@
         </fieldset>
 
         <!-- Rango de precios en COP -->
-        <fieldset class="mt-6 border-0 p-0">
-          <legend class="text-xs font-semibold text-gray-700">Precio (COP)</legend>
-          <div class="mt-2 grid grid-cols-2 gap-2.5">
-            <div>
+        <fieldset class="mt-6 border-t border-gray-100 pt-5 border-x-0 border-b-0 p-0">
+          <legend class="text-xs font-bold tracking-wider text-gray-500 uppercase">Precio (COP)</legend>
+          <div class="mt-2.5 grid grid-cols-2 gap-2.5">
+            <div class="relative">
               <label for="min-price" class="visually-hidden">Precio mínimo en pesos colombianos</label>
+              <span aria-hidden="true" class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-xs font-medium text-gray-400">$</span>
               <input id="min-price" name="minPrice" type="number" min="0" step="5000" [(ngModel)]="minPrice"
                 placeholder="Mín"
-                class="w-full rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm text-cm-black placeholder-gray-500" />
+                class="w-full rounded-lg border border-gray-300 bg-gray-50/60 py-2 pr-2.5 pl-6 text-base text-cm-black placeholder-gray-400 tabular-nums focus:bg-white sm:text-sm" />
             </div>
-            <div>
+            <div class="relative">
               <label for="max-price" class="visually-hidden">Precio máximo en pesos colombianos</label>
+              <span aria-hidden="true" class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-xs font-medium text-gray-400">$</span>
               <input id="max-price" name="maxPrice" type="number" min="0" step="5000" [(ngModel)]="maxPrice"
                 placeholder="Máx"
-                class="w-full rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm text-cm-black placeholder-gray-500" />
+                class="w-full rounded-lg border border-gray-300 bg-gray-50/60 py-2 pr-2.5 pl-6 text-base text-cm-black placeholder-gray-400 tabular-nums focus:bg-white sm:text-sm" />
             </div>
           </div>
         </fieldset>
 
         <!-- Botones de acción de filtros -->
-        <div class="mt-6 flex flex-col gap-2.5">
+        <div class="mt-6 flex flex-col gap-2 border-t border-gray-100 pt-5">
           <button type="submit"
-            class="w-full rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer">
+            class="cm-btn-primary w-full rounded-xl bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer">
             Aplicar filtros
           </button>
           <button type="button" (click)="clearFilters()"
-            class="w-full rounded-lg border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-cm-black hover:bg-gray-100 cursor-pointer">
+            class="cm-pressable w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-cm-black cursor-pointer">
             Limpiar
           </button>
         </div>
@@ -171,16 +261,21 @@
 
     <!-- Sección de resultados del catálogo -->
     <section aria-labelledby="catalog-results-heading">
-      <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <h2 id="catalog-results-heading" aria-live="polite" class="text-sm font-medium text-gray-700">
-          {{ totalCount() }} {{ totalCount() === 1 ? 'prenda encontrada' : 'prendas encontradas' }}
-        </h2>
+      <!-- Barra de estado y ordenamiento -->
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-200/80 bg-white px-4 py-3 shadow-2xs">
+        <div class="flex items-center gap-2.5">
+          <span class="h-2 w-2 rounded-full bg-cm-blue" aria-hidden="true"></span>
+          <h2 id="catalog-results-heading" aria-live="polite" class="text-sm font-semibold text-cm-black tabular-nums">
+            {{ totalCount() }} {{ totalCount() === 1 ? 'prenda encontrada' : 'prendas encontradas' }}
+          </h2>
+        </div>
 
         <!-- Ordenamiento (RF-04) -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2.5">
+          <span aria-hidden="true" class="hidden text-xs font-medium text-gray-500 sm:inline">Ordenar por:</span>
           <label for="sort-select" class="visually-hidden">Ordenar productos por</label>
           <select id="sort-select" name="ordering" [(ngModel)]="ordering" (ngModelChange)="onOrderingChange()"
-            class="rounded-lg border border-gray-400 bg-white px-3.5 py-2 text-sm font-medium text-cm-black">
+            class="rounded-xl border border-gray-300 bg-gray-50/70 px-3.5 py-2 text-sm font-medium text-cm-black hover:border-gray-400 focus:bg-white cursor-pointer">
             <option value="-creado_en">Más recientes</option>
             <option value="precio_base">Precio: menor a mayor</option>
             <option value="-precio_base">Precio: mayor a menor</option>
@@ -190,63 +285,150 @@
 
       <!-- Estado de carga / vacío / grilla de productos -->
       @if (loading()) {
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
         @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
-        <div class="h-80 animate-pulse rounded-2xl border border-gray-200 bg-white p-3">
-          <div class="h-52 rounded-xl bg-gray-200"></div>
-          <div class="mt-3 h-4 w-3/4 rounded bg-gray-200"></div>
-          <div class="mt-2 h-3 w-1/2 rounded bg-gray-200"></div>
+        <div class="flex flex-col justify-between rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-2xs animate-pulse">
+          <div>
+            <div class="aspect-[4/5] w-full rounded-xl bg-gray-200/80"></div>
+            <div class="mt-3.5 flex items-center justify-between gap-2">
+              <div class="h-3 w-20 rounded-full bg-gray-200"></div>
+              <div class="h-3 w-14 rounded-full bg-gray-200"></div>
+            </div>
+            <div class="mt-2.5 h-4 w-4/5 rounded-md bg-gray-200"></div>
+            <div class="mt-2 h-3.5 w-1/2 rounded-md bg-gray-200/70"></div>
+          </div>
+          <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+            <div>
+              <div class="h-5 w-24 rounded-md bg-gray-200"></div>
+              <div class="mt-1 h-2.5 w-14 rounded bg-gray-100"></div>
+            </div>
+            <div class="h-9 w-24 rounded-xl bg-gray-200"></div>
+          </div>
         </div>
         }
       </div>
       } @else if (products().length === 0) {
-      <div class="rounded-2xl border border-gray-300 bg-white p-12 text-center">
-        <p class="text-base font-semibold text-cm-black">
+      <div class="rounded-2xl border border-gray-200 bg-white px-6 py-16 text-center shadow-2xs">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-cm-blue">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+            class="h-7 w-7">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+        </div>
+        <p class="text-lg font-bold tracking-tight text-cm-black">
           No encontramos prendas con esos filtros.
         </p>
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mx-auto mt-1.5 max-w-md text-sm text-gray-600">
           Prueba limpiando los filtros o buscando otro término.
         </p>
         <button type="button" (click)="clearFilters()"
-          class="mt-4 rounded-lg bg-cm-blue px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer">
-          Ver todo el catálogo
+          class="cm-btn-primary mt-6 inline-flex items-center gap-2 rounded-xl bg-cm-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer">
+          <span>Ver todo el catálogo</span>
         </button>
       </div>
       } @else {
       <!-- Lista semántica con role="list" para conservar semántica en Safari con CSS Grid -->
-      <ul role="list" class="grid grid-cols-1 gap-5 list-none p-0 sm:grid-cols-2 xl:grid-cols-4">
+      <ul role="list" class="grid grid-cols-1 gap-6 list-none p-0 sm:grid-cols-2 xl:grid-cols-4">
         @for (product of products(); track product.id) {
         <li
-          class="flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-3.5 shadow-xs transition-shadow hover:shadow-md">
+          class="cm-product-card group flex flex-col justify-between rounded-2xl border border-gray-200/85 bg-white p-3.5 shadow-2xs">
           <div>
-            <!-- Miniatura / Color de prenda -->
-            @if (getProductPreviewImage(product); as previewImg) {
-            <img [src]="previewImg" [alt]="'Vista previa de ' + product.nombre"
-              class="h-52 w-full rounded-xl border border-gray-200/60 object-cover" />
-            } @else {
-            <div class="h-52 w-full rounded-xl border border-gray-200/60"
-              [style.background-color]="getProductPreviewColor(product)" role="img"
-              [attr.aria-label]="'Vista previa de ' + product.nombre"></div>
-            }
+            <!-- Contenedor editorial 4:5 con miniatura o muestra de color + badges -->
+            <div class="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gray-200/60 bg-slate-100">
+              @if (getProductPreviewImage(product); as previewImg) {
+              <img [src]="previewImg" [alt]="'Vista previa de ' + product.nombre" loading="lazy"
+                class="cm-product-media h-full w-full object-cover" />
+              } @else {
+              <div class="cm-product-media relative flex h-full w-full items-center justify-center"
+                [style.background-color]="getProductPreviewColor(product)" role="img"
+                [attr.aria-label]="'Vista previa de ' + product.nombre">
+                <div class="flex flex-col items-center gap-1.5 rounded-2xl bg-white/85 px-3.5 py-2.5 text-cm-black shadow-xs backdrop-blur-xs">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    class="h-6 w-6 text-gray-700">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                  </svg>
+                  <span class="text-[11px] font-bold tracking-wide text-gray-700 uppercase">ClickModa</span>
+                </div>
+              </div>
+              }
 
-            <h3 class="mt-3 text-sm font-bold text-cm-black">
-              {{ product.nombre }}
-            </h3>
+              <!-- Badges superiores flotantes -->
+              <div class="pointer-events-none absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-1.5">
+                @if (product.categoria_nombre) {
+                <span
+                  class="max-w-[65%] truncate rounded-lg bg-white/90 px-2.5 py-1 text-[11px] font-bold tracking-wide text-cm-black shadow-2xs backdrop-blur-md">
+                  {{ product.categoria_nombre }}
+                </span>
+                } @else {
+                <span></span>
+                }
 
-            <p class="mt-0.5 text-xs text-gray-600">
-              {{ formatSizesLabel(product.tallas_disponibles) }}
-            </p>
+                @if (product.stock_total === 0) {
+                <span class="rounded-lg bg-gray-900/90 px-2 py-1 text-[11px] font-bold text-white shadow-2xs">
+                  Agotado
+                </span>
+                } @else if (product.stock_total > 0 && product.stock_total <= 5) {
+                <span class="rounded-lg bg-amber-500/95 px-2 py-1 text-[11px] font-bold text-cm-black shadow-2xs">
+                  Últimas {{ product.stock_total }}
+                </span>
+                }
+              </div>
+            </div>
+
+            <!-- Información del producto -->
+            <div class="mt-3.5 px-0.5">
+              <h3 class="line-clamp-2 min-h-[2.5rem] text-sm leading-snug font-bold tracking-tight text-cm-black"
+                [title]="product.nombre">
+                {{ product.nombre }}
+              </h3>
+
+              <div class="mt-1.5 flex items-center justify-between gap-2">
+                <p class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600">
+                  <span class="h-1.5 w-1.5 rounded-full"
+                    [class]="product.tallas_disponibles.length > 0 ? 'bg-emerald-500' : 'bg-gray-400'"
+                    aria-hidden="true"></span>
+                  <span>{{ formatSizesLabel(product.tallas_disponibles) }}</span>
+                </p>
+
+                @if (product.tallas_disponibles.length > 0) {
+                <div class="flex items-center gap-1" aria-hidden="true">
+                  @for (talla of product.tallas_disponibles.slice(0, 3); track talla) {
+                  <span class="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-700">
+                    {{ talla }}
+                  </span>
+                  }
+                  @if (product.tallas_disponibles.length > 3) {
+                  <span class="text-[10px] font-semibold text-gray-500">
+                    +{{ product.tallas_disponibles.length - 3 }}
+                  </span>
+                  }
+                </div>
+                }
+              </div>
+            </div>
           </div>
 
-          <div class="mt-3 flex items-center justify-between gap-2 pt-2">
-            <span class="text-sm font-extrabold text-cm-black">
-              {{ product.precio_base | currency: 'COP' : '$' : '1.0-0' }}
-            </span>
+          <!-- Pie de tarjeta: Precio y CTA Agregar -->
+          <div class="mt-3.5 flex items-end justify-between gap-2 border-t border-gray-100 px-0.5 pt-3">
+            <div class="min-w-0">
+              <span class="block text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
+                Precio
+              </span>
+              <span class="block truncate text-base font-extrabold tracking-tight text-cm-black tabular-nums">
+                {{ product.precio_base | currency: 'COP' : '$' : '1.0-0' }}
+              </span>
+            </div>
 
             <button type="button" (click)="addToCartPreview(product)"
               [attr.aria-label]="'Agregar ' + product.nombre + ' al carrito'"
-              class="rounded-lg bg-cm-blue px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 cursor-pointer">
-              Agregar
+              class="cm-btn-primary inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-cm-blue px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-700 cursor-pointer">
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5">
+                <path
+                  d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+              </svg>
+              <span>Agregar</span>
             </button>
           </div>
         </li>
@@ -255,26 +437,36 @@
 
       <!-- Paginación (RF-01) -->
       @if (totalPages() > 1) {
-      <nav aria-label="Paginación del catálogo" class="mt-8 flex items-center justify-center gap-2">
+      <nav aria-label="Paginación del catálogo" class="mt-10 flex flex-wrap items-center justify-center gap-2">
         <button type="button" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() <= 1"
-          class="rounded-lg border border-gray-400 bg-white px-3.5 py-2 text-sm font-semibold text-cm-black hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
-          Anterior
+          class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-cm-black shadow-2xs hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+            <path fill-rule="evenodd"
+              d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>Anterior</span>
         </button>
 
         @for (page of pageNumbers(); track page) {
         <button type="button" (click)="goToPage(page)" [attr.aria-current]="currentPage() === page ? 'page' : null"
           [class]="
                       currentPage() === page
-                        ? 'border-cm-blue bg-cm-blue text-white'
-                        : 'border-gray-400 bg-white text-cm-black hover:bg-gray-100'
-                    " class="min-w-10 rounded-lg border px-3 py-2 text-sm font-semibold cursor-pointer">
+                        ? 'border-cm-blue bg-cm-blue text-white shadow-xs'
+                        : 'border-gray-300 bg-white text-cm-black hover:border-gray-400 hover:bg-gray-50'
+                    " class="min-w-10 rounded-xl border px-3.5 py-2 text-sm font-bold tabular-nums cursor-pointer">
           {{ page }}
         </button>
         }
 
         <button type="button" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()"
-          class="rounded-lg border border-gray-400 bg-white px-3.5 py-2 text-sm font-semibold text-cm-black hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
-          Siguiente
+          class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-cm-black shadow-2xs hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
+          <span>Siguiente</span>
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+            <path fill-rule="evenodd"
+              d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+              clip-rule="evenodd" />
+          </svg>
         </button>
       </nav>
       }
