@@ -1,0 +1,98 @@
+.dian-validated-pill {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-cm-blue, #2563eb);
+  background-color: #eff6ff;
+  border-radius: 9999px;
+}
+
+.step-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+.step-badge-ready {
+  background-color: #eff6ff;
+  color: var(--color-cm-blue, #2563eb);
+}
+
+.step-badge-approved {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.btn-invoice-primary {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--color-cm-blue, #2563eb);
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+}
+
+.btn-invoice-primary:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-invoice-secondary {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-cm-black, #111827);
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.625rem;
+  cursor: pointer;
+}
+
+.btn-invoice-secondary:hover:not(:disabled) {
+  background-color: #f9fafb;
+}
+
+.btn-invoice-amber {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-cm-black, #111827);
+  background-color: var(--color-cm-amber, #f59e0b);
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+}
+
+.btn-invoice-amber:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.btn-invoice-primary:disabled,
+.btn-invoice-secondary:disabled,
+.btn-invoice-amber:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.invoice-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.invoice-alert-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}

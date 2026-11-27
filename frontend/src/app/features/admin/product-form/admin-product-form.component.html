@@ -1,0 +1,432 @@
+<section class="admin-section" aria-labelledby="product-form-heading">
+  <header class="section-header">
+    <div>
+      <p class="section-eyebrow">Taller · Ficha técnica</p>
+      <h1 id="product-form-heading" class="section-title">
+        {{ productId() !== null ? 'Editar producto' : 'Nuevo producto' }}
+      </h1>
+    </div>
+
+    <a routerLink="/admin/productos" class="btn-ghost">← Volver a productos</a>
+  </header>
+
+  @if (feedbackMessage()) {
+    <div role="status" aria-live="polite" class="alert alert--success">
+      <span>✓ {{ feedbackMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div role="alert" class="alert alert--error">
+      <span role="img" aria-label="Error">⚠️</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <article class="workshop-card">
+      <p class="state-msg" aria-busy="true">Cargando ficha del producto…</p>
+    </article>
+  } @else {
+    <form
+      #productFormEl
+      [formGroup]="productForm"
+      (ngSubmit)="submitProduct()"
+      class="form-stack"
+      novalidate
+    >
+      <!-- Datos principales -->
+      <article class="workshop-card">
+        <h2 class="card-title">Información general</h2>
+
+        <div class="fields-grid">
+          <div class="field field--full">
+            <label for="pf-nombre">Nombre del producto <span aria-hidden="true">*</span></label>
+            <input
+              id="pf-nombre"
+              name="nombre"
+              type="text"
+              formControlName="nombre"
+              required
+              maxlength="180"
+              [attr.aria-invalid]="isFieldInvalid('nombre')"
+              [attr.aria-describedby]="isFieldInvalid('nombre') ? 'pf-nombre-error' : null"
+            />
+            @if (isFieldInvalid('nombre')) {
+              <p id="pf-nombre-error" class="field-error">
+                <span role="img" aria-label="Error">❌</span> El nombre del producto es obligatorio.
+              </p>
+            }
+          </div>
+
+          <div class="field field--full">
+            <label for="pf-descripcion">Descripción</label>
+            <textarea
+              id="pf-descripcion"
+              name="descripcion"
+              rows="3"
+              formControlName="descripcion"
+              placeholder="Materiales, corte y cuidados de la prenda"
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label for="pf-categoria">Categoría <span aria-hidden="true">*</span></label>
+            <select
+              id="pf-categoria"
+              name="categoria"
+              formControlName="categoria"
+              required
+              [attr.aria-invalid]="isFieldInvalid('categoria')"
+              [attr.aria-describedby]="isFieldInvalid('categoria') ? 'pf-categoria-error' : null"
+            >
+              <option [ngValue]="0">Selecciona una categoría</option>
+              @for (cat of categories(); track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.nombre }}</option>
+              }
+            </select>
+            @if (isFieldInvalid('categoria')) {
+              <p id="pf-categoria-error" class="field-error">
+                <span role="img" aria-label="Error">❌</span> Selecciona una categoría válida.
+              </p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="pf-precio">Precio base (COP) <span aria-hidden="true">*</span></label>
+            <input
+              id="pf-precio"
+              name="precio_base"
+              type="number"
+              min="0"
+              step="100"
+              formControlName="precio_base"
+              required
+              [attr.aria-invalid]="isFieldInvalid('precio_base')"
+              [attr.aria-describedby]="isFieldInvalid('precio_base') ? 'pf-precio-error' : null"
+            />
+            @if (isFieldInvalid('precio_base')) {
+              <p id="pf-precio-error" class="field-error">
+                <span role="img" aria-label="Error">❌</span> El precio debe ser mayor o igual a 0.
+              </p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="pf-iva">Porcentaje IVA (%) <span aria-hidden="true">*</span></label>
+            <input
+              id="pf-iva"
+              name="porcentaje_iva"
+              type="number"
+              min="0"
+              max="100"
+              formControlName="porcentaje_iva"
+              required
+              [attr.aria-invalid]="isFieldInvalid('porcentaje_iva')"
+              [attr.aria-describedby]="isFieldInvalid('porcentaje_iva') ? 'pf-iva-error' : null"
+            />
+            @if (isFieldInvalid('porcentaje_iva')) {
+              <p id="pf-iva-error" class="field-error">
+                <span role="img" aria-label="Error">❌</span> El IVA debe estar entre 0 y 100.
+              </p>
+            }
+          </div>
+
+          <div class="field checkbox-field">
+            <input id="pf-activo" name="activo" type="checkbox" formControlName="activo" />
+            <label for="pf-activo">Producto activo y visible en el catálogo</label>
+          </div>
+        </div>
+      </article>
+
+      <!-- Gestor de variantes -->
+      <article class="workshop-card">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Variantes (tallas, colores y stock)</h2>
+            <p class="card-subtitle">
+              Evita repetir la misma combinación de talla y color.
+            </p>
+          </div>
+
+          <div class="quick-sizes" role="group" aria-label="Agregar variante rápida por talla">
+            @for (size of sizes; track size) {
+              <button type="button" class="btn-chip" (click)="addVariant(size)">
+                + {{ size }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (variantesArray.errors?.['duplicateVariant']; as dup) {
+          <div role="alert" class="alert alert--error">
+            <span role="img" aria-label="Error">⚠️</span>
+            <span>
+              Variante duplicada: talla {{ dup.talla }} y color "{{ dup.color }}". Ajusta una de las filas.
+            </span>
+          </div>
+        }
+
+        <div formArrayName="variantes" class="variants-list">
+          @for (varGroup of variantesArray.controls; track $index) {
+            <fieldset
+              [formGroupName]="$index"
+              class="variant-row"
+              [class.variant-row--duplicate]="isDuplicateRow($index)"
+            >
+              <legend class="visually-hidden">Variante {{ $index + 1 }}</legend>
+
+              <div class="field">
+                <label [for]="'var-talla-' + $index">Talla</label>
+                <select [id]="'var-talla-' + $index" formControlName="talla">
+                  @for (size of sizes; track size) {
+                    <option [value]="size">{{ size }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field">
+                <label [for]="'var-color-' + $index">Color <span aria-hidden="true">*</span></label>
+                <input
+                  [id]="'var-color-' + $index"
+                  type="text"
+                  formControlName="color"
+                  placeholder="Ej. Azul Índigo"
+                  required
+                  [attr.aria-invalid]="isVariantFieldInvalid($index, 'color') || isDuplicateRow($index)"
+                />
+              </div>
+
+              <div class="field">
+                <label [for]="'var-hex-' + $index">Color HEX</label>
+                <div class="hex-pair">
+                  <input
+                    type="color"
+                    formControlName="color_hex"
+                    [attr.aria-label]="'Selector de color variante ' + ($index + 1)"
+                    class="color-picker"
+                  />
+                  <input
+                    [id]="'var-hex-' + $index"
+                    type="text"
+                    formControlName="color_hex"
+                    maxlength="7"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    [attr.aria-invalid]="isVariantFieldInvalid($index, 'color_hex')"
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label [for]="'var-sku-' + $index">SKU (opcional)</label>
+                <input
+                  [id]="'var-sku-' + $index"
+                  type="text"
+                  formControlName="sku"
+                  placeholder="Autogenerado si vacío"
+                  autocorrect="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                />
+              </div>
+
+              <div class="field">
+                <label [for]="'var-stock-' + $index">Stock <span aria-hidden="true">*</span></label>
+                <input
+                  [id]="'var-stock-' + $index"
+                  type="number"
+                  min="0"
+                  formControlName="stock"
+                  required
+                  [attr.aria-invalid]="isVariantFieldInvalid($index, 'stock')"
+                />
+              </div>
+
+              <div class="variant-remove">
+                <button
+                  type="button"
+                  class="action-danger"
+                  [attr.aria-label]="'Quitar variante ' + ($index + 1)"
+                  (click)="removeVariant($index)"
+                >
+                  Quitar
+                </button>
+              </div>
+            </fieldset>
+          }
+        </div>
+
+        <div class="variant-footer">
+          <button type="button" class="btn-ghost" (click)="addVariant('M')">
+            + Agregar variante
+          </button>
+        </div>
+      </article>
+
+      <!-- Gestor de imágenes -->
+      <article class="workshop-card">
+        <h2 class="card-title">Imágenes del producto</h2>
+        <p class="card-subtitle">
+          Sube fotografías reales (JPEG, PNG o WEBP, máximo 5 MB por archivo) o agrega una URL / color #hex.
+        </p>
+
+        <div
+          class="dropzone"
+          [class.dropzone--active]="dragActive()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <label for="pf-files" class="btn-secondary dropzone-btn">
+            Seleccionar imágenes
+          </label>
+          <input
+            id="pf-files"
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp"
+            class="visually-hidden"
+            (change)="onFilesSelected($event)"
+          />
+          <span class="dropzone-hint">o arrastra y suelta aquí (JPEG, PNG, WEBP · máx. 5 MB)</span>
+        </div>
+
+        @if (imageErrors().length > 0) {
+          <div role="alert" class="alert alert--error mt-space">
+            <ul class="error-list">
+              @for (err of imageErrors(); track err) {
+                <li>{{ err }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (pendingFiles().length > 0) {
+          <div class="media-block">
+            <h3 class="media-subtitle">Pendientes por subir ({{ pendingFiles().length }})</h3>
+            <ul class="media-grid" role="list">
+              @for (item of pendingFiles(); track item.id) {
+                <li class="media-card">
+                  <img [src]="item.previewUrl" [alt]="'Previsualización de ' + item.name" class="media-thumb" />
+                  <div class="media-info">
+                    <span class="media-name">{{ item.name }}</span>
+                    <span class="media-meta">{{ item.sizeLabel }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="action-danger"
+                    (click)="removePendingFile(item.id)"
+                  >
+                    Quitar
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (savedImages().length > 0) {
+          <div class="media-block">
+            <h3 class="media-subtitle">Imágenes guardadas ({{ savedImages().length }})</h3>
+            <ul class="media-grid" role="list">
+              @for (img of savedImages(); track img.id ?? img.url) {
+                <li class="media-card">
+                  @if (isImageUrl(img.url)) {
+                    <img
+                      [src]="resolveImageSrc(img.url)"
+                      alt="Imagen guardada del producto"
+                      class="media-thumb"
+                    />
+                  } @else {
+                    <span
+                      class="media-swatch"
+                      [style.background-color]="img.url"
+                      role="img"
+                      [attr.aria-label]="'Muestra de color ' + img.url"
+                    ></span>
+                  }
+                  <div class="media-info">
+                    <span class="media-name">{{ img.es_archivo ? 'Archivo subido' : img.url }}</span>
+                    <span class="media-meta">Orden {{ img.orden }}</span>
+                  </div>
+                  @if (img.id) {
+                    <button
+                      type="button"
+                      class="action-danger"
+                      [disabled]="deletingImageId() === img.id"
+                      (click)="deleteSavedImage(img)"
+                    >
+                      {{ deletingImageId() === img.id ? 'Eliminando…' : 'Eliminar' }}
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <!-- Opción URL / Color hex -->
+        <div class="manual-media">
+          <div class="field manual-field">
+            <label for="pf-manual-url">Agregar imagen por URL o color #hex (opcional)</label>
+            <div class="manual-row">
+              <input
+                id="pf-manual-url"
+                type="text"
+                [formControl]="manualImageInput"
+                placeholder="https://... , /media/... o #1B2A5C"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+              />
+              <button type="button" class="btn-ghost" (click)="addManualImage()">
+                Agregar URL / color
+              </button>
+            </div>
+            @if (manualImageError()) {
+              <p class="field-error">
+                <span role="img" aria-label="Error">❌</span> {{ manualImageError() }}
+              </p>
+            }
+          </div>
+
+          @if (manualImages().length > 0) {
+            <ul class="media-grid" role="list">
+              @for (img of manualImages(); track $index) {
+                <li class="media-card">
+                  @if (isImageUrl(img.url)) {
+                    <img [src]="resolveImageSrc(img.url)" alt="Imagen por URL" class="media-thumb" />
+                  } @else {
+                    <span class="media-swatch" [style.background-color]="img.url"></span>
+                  }
+                  <div class="media-info">
+                    <span class="media-name">{{ img.url }}</span>
+                    <span class="media-meta">Por guardar</span>
+                  </div>
+                  <button type="button" class="action-danger" (click)="removeManualImage($index)">
+                    Quitar
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </article>
+
+      <div class="submit-bar">
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{
+            saving()
+              ? 'Guardando producto…'
+              : productId() !== null
+                ? 'Guardar cambios'
+                : 'Crear producto'
+          }}
+        </button>
+        <a routerLink="/admin/productos" class="btn-ghost">Cancelar</a>
+      </div>
+    </form>
+  }
+</section>

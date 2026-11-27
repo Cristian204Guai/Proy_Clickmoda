@@ -1,0 +1,167 @@
+.auth {
+  position: relative;
+  max-width: 24rem;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  color: var(--color-text, #111827);
+  box-shadow: 
+    0 10px 25px -5px rgba(17, 24, 39, 0.08),
+    0 8px 10px -6px rgba(17, 24, 39, 0.04);
+  overflow: hidden;
+  animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Barra superior decorativa con colores de respaldo seguros */
+.auth::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg, 
+    var(--color-primary, #2563EB), 
+    var(--color-accent, #F59E0B)
+  );
+}
+
+form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-top: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+form:focus-within label {
+  color: var(--color-text, #111827);
+}
+
+input {
+  padding: 0.65rem 0.85rem;
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font: inherit;
+  color: var(--color-text, #111827);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:hover:not(:disabled) {
+  background-color: #ffffff;
+  border-color: #9ca3af;
+}
+
+input:focus {
+  background-color: #ffffff;
+  border-color: var(--color-primary, #2563EB);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--color-accent, #F59E0B);
+  outline-offset: 2px;
+}
+
+input[aria-invalid='true'] {
+  border-color: #b91c1c;
+  background-color: #fef2f2;
+  animation: shakeError 0.35s ease-in-out;
+}
+
+.field-error,
+.form-error {
+  color: #b91c1c;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  animation: fadeInDown 0.25s ease-out;
+}
+
+button {
+  position: relative;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  /* Color sólido de respaldo + degradado seguro */
+  background-color: var(--color-primary, #2563EB);
+  background-image: linear-gradient(135deg, var(--color-primary, #2563EB), #1D4ED8);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  filter: brightness(1.06);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+a {
+  color: var(--color-primary, #2563EB);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #1D4ED8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}

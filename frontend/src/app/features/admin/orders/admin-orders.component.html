@@ -1,0 +1,307 @@
+<section class="admin-section" aria-labelledby="orders-heading">
+  <header class="section-header">
+    <div>
+      <p class="section-eyebrow">Taller · Despachos</p>
+      <h1 id="orders-heading" class="section-title">Órdenes</h1>
+    </div>
+  </header>
+
+  <article class="workshop-card">
+    <search>
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filters-grid" novalidate>
+        <div class="field">
+          <label for="ord-search">Buscar orden o cliente</label>
+          <input
+            id="ord-search"
+            name="search"
+            type="search"
+            formControlName="search"
+            placeholder="N° orden, nombre o correo"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="field">
+          <label for="ord-estado">Estado</label>
+          <select id="ord-estado" name="estado" formControlName="estado">
+            <option value="">Todos los estados</option>
+            @for (st of allStatuses; track st) {
+              <option [value]="st">{{ getStatusLabel(st) }} ({{ st }})</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn-secondary">Filtrar</button>
+          <button type="button" class="btn-ghost" (click)="clearFilters()">Limpiar</button>
+        </div>
+      </form>
+    </search>
+  </article>
+
+  @if (feedbackMessage()) {
+    <div role="status" aria-live="polite" class="alert alert--success">
+      <span>✓ {{ feedbackMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div role="alert" class="alert alert--error">
+      <span role="img" aria-label="Error">⚠️</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="orders-grid" [class.has-detail]="selectedOrder() !== null">
+    <article class="workshop-card">
+      <div class="table-toolbar">
+        <p class="results-count" aria-live="polite">
+          {{ totalCount() }} {{ totalCount() === 1 ? 'orden encontrada' : 'órdenes encontradas' }}
+        </p>
+      </div>
+
+      @if (loading()) {
+        <p class="state-msg" aria-busy="true">Cargando órdenes…</p>
+      } @else if (orders().length === 0) {
+        <div class="empty-state">
+          <p class="empty-title">No hay órdenes para los filtros actuales.</p>
+          <button type="button" class="btn-ghost" (click)="clearFilters()">Ver todas</button>
+        </div>
+      } @else {
+        <div tabindex="0" role="region" aria-labelledby="orders-table-caption" class="table-wrapper">
+          <table class="data-table">
+            <caption id="orders-table-caption" class="visually-hidden">
+              Listado administrativo de órdenes
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Orden</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Pago</th>
+                <th scope="col">Total</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of orders(); track order.id) {
+                <tr [class.is-selected]="selectedOrder()?.id === order.id">
+                  <th scope="row" class="cell-num">#{{ order.id }}</th>
+                  <td>{{ order.creado_en | date: 'short' }}</td>
+                  <td>
+                    <span class="client-name">{{ order.direccion_envio.nombre_completo }}</span>
+                    <span class="client-email">{{ order.cliente_email }}</span>
+                  </td>
+                  <td>
+                    <span [class]="getStatusBadgeClass(order.estado)">
+                      {{ getStatusLabel(order.estado) }}
+                    </span>
+                  </td>
+                  <td>{{ order.metodo_pago }}</td>
+                  <td class="cell-num">{{ order.total | currency: 'COP' : '$' : '1.0-0' }}</td>
+                  <td>
+                    <button type="button" class="action-link" (click)="selectOrder(order)">
+                      Ver detalle
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages() > 1) {
+          <nav aria-label="Paginación de órdenes" class="pagination">
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPage() <= 1"
+              (click)="goToPage(currentPage() - 1)"
+            >
+              Anterior
+            </button>
+
+            @for (page of pageNumbers(); track page) {
+              <button
+                type="button"
+                class="page-btn"
+                [class.is-current]="currentPage() === page"
+                [attr.aria-current]="currentPage() === page ? 'page' : null"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPage() >= totalPages()"
+              (click)="goToPage(currentPage() + 1)"
+            >
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    </article>
+
+    @if (selectedOrder(); as order) {
+      <aside class="workshop-card detail-panel" aria-labelledby="order-detail-heading">
+        <header class="detail-header">
+          <div>
+            <h2 id="order-detail-heading" class="detail-title">Orden #{{ order.id }}</h2>
+            <p class="detail-date">{{ order.creado_en | date: 'medium' }}</p>
+          </div>
+          <button type="button" class="btn-ghost" (click)="closeDetail()">Cerrar</button>
+        </header>
+
+        @if (loadingDetail()) {
+          <p class="state-msg" aria-busy="true">Actualizando detalle…</p>
+        }
+
+        <div class="detail-section">
+          <div class="status-row">
+            <span class="meta-label">Estado actual:</span>
+            <span [class]="getStatusBadgeClass(order.estado)">
+              {{ getStatusLabel(order.estado) }}
+            </span>
+          </div>
+
+          @if (getValidTransitions(order.estado); as transitions) {
+            @if (transitions.length > 0) {
+              <div class="transition-controls">
+                <label for="next-order-status" class="meta-label">Cambiar estado a</label>
+                <div class="transition-row">
+                  <select id="next-order-status" [formControl]="statusControl">
+                    @for (nextSt of transitions; track nextSt) {
+                      <option [value]="nextSt">{{ getStatusLabel(nextSt) }} ({{ nextSt }})</option>
+                    }
+                  </select>
+                  <button
+                    type="button"
+                    class="btn-primary"
+                    [disabled]="updatingStatus() || !statusControl.value"
+                    (click)="updateSelectedOrderStatus()"
+                  >
+                    {{ updatingStatus() ? 'Actualizando…' : 'Actualizar estado' }}
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <p class="final-state-note">
+                Esta orden se encuentra en un estado final y no admite más transiciones.
+              </p>
+            }
+          }
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-subtitle">Envío y contacto</h3>
+          <dl class="info-list">
+            <div>
+              <dt>Destinatario</dt>
+              <dd>{{ order.direccion_envio.nombre_completo }}</dd>
+            </div>
+            <div>
+              <dt>Correo</dt>
+              <dd>{{ order.cliente_email || 'No registrado' }}</dd>
+            </div>
+            <div>
+              <dt>Teléfono</dt>
+              <dd>{{ order.direccion_envio.telefono }}</dd>
+            </div>
+            <div>
+              <dt>Dirección</dt>
+              <dd>{{ order.direccion_envio.direccion }}, {{ order.direccion_envio.ciudad }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-subtitle">Pago y facturación</h3>
+          <dl class="info-list">
+            <div>
+              <dt>Método</dt>
+              <dd>{{ order.metodo_pago }}</dd>
+            </div>
+            @if (order.payment) {
+              <div>
+                <dt>Estado pago</dt>
+                <dd>{{ order.payment.estado }} · {{ order.payment.referencia }}</dd>
+              </div>
+              @if (order.payment.mensaje_respuesta) {
+                <div>
+                  <dt>Respuesta pasarela</dt>
+                  <dd>{{ order.payment.mensaje_respuesta }}</dd>
+                </div>
+              }
+            }
+            @if (order.requiere_factura_electronica) {
+              <div>
+                <dt>Documento DIAN</dt>
+                <dd>{{ order.tipo_documento }} {{ order.numero_documento }} ({{ order.correo_factura }})</dd>
+              </div>
+            }
+          </dl>
+
+          @if (order.factura_id) {
+            <a [routerLink]="['/factura', order.factura_id]" class="invoice-link">
+              Ver factura {{ order.factura_numero || ('#' + order.factura_id) }}
+            </a>
+          }
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-subtitle">Ítems ({{ order.items.length }})</h3>
+          <ul class="items-list" role="list">
+            @for (item of order.items; track item.id) {
+              <li class="order-item">
+                <div>
+                  <span class="item-name">{{ item.nombre_producto }}</span>
+                  <span class="item-meta">
+                    {{ item.talla }} · {{ item.color }} · Cant. {{ item.cantidad }}
+                  </span>
+                  <span class="item-meta">
+                    Unit. {{ item.precio_unitario | currency: 'COP' : '$' : '1.0-0' }} · IVA {{ item.porcentaje_iva }}%
+                  </span>
+                </div>
+                <strong class="cell-num">
+                  {{ item.subtotal | currency: 'COP' : '$' : '1.0-0' }}
+                </strong>
+              </li>
+            }
+          </ul>
+
+          <dl class="totals-list">
+            <div>
+              <dt>Subtotal</dt>
+              <dd>{{ order.subtotal | currency: 'COP' : '$' : '1.0-0' }}</dd>
+            </div>
+            <div>
+              <dt>Envío</dt>
+              <dd>{{ order.envio | currency: 'COP' : '$' : '1.0-0' }}</dd>
+            </div>
+            <div>
+              <dt>Impuestos (IVA)</dt>
+              <dd>{{ order.impuestos | currency: 'COP' : '$' : '1.0-0' }}</dd>
+            </div>
+            @if (order.descuento > 0) {
+              <div>
+                <dt>Descuento {{ order.cupon_codigo ? '(' + order.cupon_codigo + ')' : '' }}</dt>
+                <dd>-{{ order.descuento | currency: 'COP' : '$' : '1.0-0' }}</dd>
+              </div>
+            }
+            <div class="total-row">
+              <dt>Total</dt>
+              <dd>{{ order.total | currency: 'COP' : '$' : '1.0-0' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </aside>
+    }
+  </div>
+</section>

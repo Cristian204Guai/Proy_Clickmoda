@@ -1,0 +1,225 @@
+<section class="admin-section" aria-labelledby="products-heading">
+  <header class="section-header">
+    <div>
+      <p class="section-eyebrow">Taller · Catálogo</p>
+      <h1 id="products-heading" class="section-title">Productos</h1>
+    </div>
+
+    <a routerLink="/admin/productos/nuevo" class="btn-primary">
+      + Agregar producto
+    </a>
+  </header>
+
+  <article class="workshop-card">
+    <search>
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filters-grid" novalidate>
+        <div class="field">
+          <label for="prod-search">Buscar prenda</label>
+          <input
+            id="prod-search"
+            name="search"
+            type="search"
+            formControlName="search"
+            placeholder="Nombre o descripción"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="field">
+          <label for="prod-category">Categoría</label>
+          <select id="prod-category" name="category" formControlName="category">
+            <option value="">Todas las categorías</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="prod-estado">Estado</label>
+          <select id="prod-estado" name="estado" formControlName="estado">
+            <option value="">Todos</option>
+            <option value="activo">Activo</option>
+            <option value="agotado">Agotado</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn-secondary">Filtrar</button>
+          <button type="button" class="btn-ghost" (click)="clearFilters()">Limpiar</button>
+        </div>
+      </form>
+    </search>
+  </article>
+
+  @if (feedbackMessage()) {
+    <div role="status" aria-live="polite" class="alert alert--success">
+      <span>✓ {{ feedbackMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div role="alert" class="alert alert--error">
+      <span role="img" aria-label="Error">⚠️</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (pendingDelete(); as target) {
+    <section
+      class="workshop-card confirm-box"
+      role="alertdialog"
+      aria-labelledby="confirm-delete-title"
+      aria-describedby="confirm-delete-desc"
+    >
+      <h2 id="confirm-delete-title" class="confirm-title">
+        Confirmar acción sobre "{{ target.nombre }}"
+      </h2>
+      <p id="confirm-delete-desc" class="confirm-desc">
+        Si el producto no tiene órdenes registradas se eliminará de forma permanente; si tiene órdenes asociadas se desactivará automáticamente.
+      </p>
+      <div class="confirm-actions">
+        <button
+          type="button"
+          class="btn-danger"
+          [disabled]="deleting()"
+          (click)="confirmDelete()"
+        >
+          {{ deleting() ? 'Procesando…' : 'Confirmar eliminar / desactivar' }}
+        </button>
+        <button
+          type="button"
+          class="btn-ghost"
+          [disabled]="deleting()"
+          (click)="cancelDelete()"
+        >
+          Cancelar
+        </button>
+      </div>
+    </section>
+  }
+
+  <article class="workshop-card">
+    <div class="table-toolbar">
+      <p class="results-count" aria-live="polite">
+        {{ totalCount() }} {{ totalCount() === 1 ? 'producto encontrado' : 'productos encontrados' }}
+      </p>
+    </div>
+
+    @if (loading()) {
+      <p class="state-msg" aria-busy="true">Cargando productos…</p>
+    } @else if (products().length === 0) {
+      <div class="empty-state">
+        <p class="empty-title">No hay productos que coincidan con la búsqueda.</p>
+        <button type="button" class="btn-ghost" (click)="clearFilters()">Ver todos</button>
+      </div>
+    } @else {
+      <div tabindex="0" role="region" aria-labelledby="products-table-caption" class="table-wrapper">
+        <table class="data-table">
+          <caption id="products-table-caption" class="visually-hidden">
+            Listado administrativo de productos
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Miniatura</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Precio (COP)</th>
+              <th scope="col">Stock</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products(); track product.id) {
+              <tr>
+                <td>
+                  @if (getPreviewImage(product); as imgUrl) {
+                    <img
+                      [src]="imgUrl"
+                      [alt]="'Miniatura de ' + product.nombre"
+                      class="thumb-img"
+                    />
+                  } @else {
+                    <span
+                      class="thumb-swatch"
+                      [style.background-color]="getPreviewColor(product)"
+                      role="img"
+                      [attr.aria-label]="'Color de muestra de ' + product.nombre"
+                    ></span>
+                  }
+                </td>
+                <th scope="row" class="cell-name">
+                  <span class="product-name">{{ product.nombre }}</span>
+                  <span class="product-meta">{{ product.variantes.length }} variantes</span>
+                </th>
+                <td>{{ product.categoria_nombre }}</td>
+                <td class="cell-num">{{ product.precio_base | currency: 'COP' : '$' : '1.0-0' }}</td>
+                <td class="cell-num">{{ product.stock_total }}</td>
+                <td>
+                  <span class="badge" [class]="getStatusClass(product.estado_display)">
+                    {{ product.estado_display }}
+                  </span>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <a
+                      [routerLink]="['/admin/productos', product.id, 'editar']"
+                      class="action-link"
+                    >
+                      Editar
+                    </a>
+                    <button
+                      type="button"
+                      class="action-danger"
+                      (click)="requestDelete(product)"
+                    >
+                      {{ product.activo ? 'Eliminar / Desactivar' : 'Eliminar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav aria-label="Paginación de productos" class="pagination">
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() <= 1"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            Anterior
+          </button>
+
+          @for (page of pageNumbers(); track page) {
+            <button
+              type="button"
+              class="page-btn"
+              [class.is-current]="currentPage() === page"
+              [attr.aria-current]="currentPage() === page ? 'page' : null"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          }
+
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </nav>
+      }
+    }
+  </article>
+</section>

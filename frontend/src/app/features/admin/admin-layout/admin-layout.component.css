@@ -1,0 +1,390 @@
+/* ==========================================================================
+   ClickModa · Panel de administración
+   Concepto: el taller de confección.
+   - Barra lateral = tela denim con costura de hilo amarillo.
+   - Menú = etiquetas colgantes con ojal.
+   - Zona principal = papel de patronaje con cinta métrica arriba.
+   Lo memorable (y lo único exagerado) es la cinta métrica; el resto es sobrio.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght,wdth@12..96,400..800,75..100&display=swap");
+
+:host {
+  --denim: #1b2a5c;
+  --denim-deep: #131f47;
+  --hilo: #f2c230;      /* hilo de costura / cinta métrica */
+  --tiza: #e0457b;      /* tiza de sastre */
+  --papel: #e9eff6;     /* papel de calco */
+  --trazo: rgba(27, 42, 92, 0.08);
+
+  --sidebar: 15rem;
+  --tape: 2.5rem;
+
+  display: block;
+  font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  font-variation-settings: "opsz" 14;
+  color: var(--denim);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Estructura ---------- */
+
+.admin {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- Barra lateral: denim ---------- */
+
+.admin__sidebar {
+  position: relative;
+  flex: 0 0 var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.75rem 1.25rem 1.5rem 1.5rem;
+  color: #fff;
+  /* sarga: diagonales finas que imitan el tejido del denim */
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.045) 0 1px,
+      transparent 1px 4px
+    ),
+    linear-gradient(180deg, var(--denim) 0%, var(--denim-deep) 100%);
+}
+
+/* costura vertical de hilo amarillo en el borde derecho */
+.admin__sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0.75rem 0.6rem 0.75rem auto;
+  width: 0;
+  border-right: 2px dashed var(--hilo);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.admin__brand {
+  display: block;
+  font-size: 2.1rem;
+  font-weight: 800;
+  font-variation-settings: "opsz" 96, "wdth" 75;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.admin__brand-accent {
+  color: var(--hilo);
+  font-style: italic;
+}
+
+/* ---------- Menú: etiquetas colgantes ---------- */
+
+.admin__nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin__nav li,
+.admin__nav a {
+  position: relative;
+  display: block;
+  padding: 0.65rem 1rem 0.65rem 2.4rem;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  /* esquina izquierda recortada, como una etiqueta de ropa */
+  clip-path: polygon(0 50%, 1rem 0, 100% 0, 100% 100%, 1rem 100%);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    padding-left 0.18s ease;
+}
+
+/* si el <li> contiene un <a>, que el estilo viva solo en el <a> */
+.admin__nav li:has(> a) {
+  padding: 0;
+  background: none;
+  clip-path: none;
+}
+
+/* ojal de la etiqueta */
+.admin__nav li:not(:has(> a))::before,
+.admin__nav a::before {
+  content: "";
+  position: absolute;
+  left: 1.15rem;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: var(--denim-deep);
+  box-shadow: 0 0 0 2px var(--hilo);
+}
+
+.admin__nav li:not(:has(> a)):hover,
+.admin__nav a:hover,
+.admin__nav .is-active,
+.admin__nav .is-active > a {
+  background: var(--hilo);
+  color: var(--denim-deep);
+  padding-left: 2.7rem;
+}
+
+.admin__nav a:focus-visible,
+.admin__store-link:focus-visible,
+.admin__logout:focus-visible {
+  outline: 3px solid var(--tiza);
+  outline-offset: 3px;
+}
+
+/* ---------- Pie de barra lateral: tienda y cierre de sesión ---------- */
+
+.admin__sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.admin__store-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: color 0.18s ease;
+}
+
+.admin__store-link:hover {
+  color: var(--hilo);
+}
+
+/* ---------- Cerrar sesión ---------- */
+
+.admin__logout {
+  align-self: flex-start;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: transparent;
+  border: 2px dashed rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.admin__logout:hover {
+  background: var(--tiza);
+  border-color: var(--tiza);
+  border-style: solid;
+}
+
+/* ---------- Zona principal: papel de patronaje ---------- */
+
+.admin__main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: calc(var(--tape) + 1.5rem) clamp(1.25rem, 4vw, 3rem) 2.5rem;
+  background:
+    linear-gradient(var(--trazo) 1px, transparent 1px) 0 0 / 100% 120px,
+    linear-gradient(90deg, var(--trazo) 1px, transparent 1px) 0 0 / 120px 100%,
+    linear-gradient(rgba(27, 42, 92, 0.04) 1px, transparent 1px) 0 0 / 100% 24px,
+    linear-gradient(90deg, rgba(27, 42, 92, 0.04) 1px, transparent 1px) 0 0 / 24px 100%,
+    var(--papel);
+}
+
+.admin__skip-link:focus {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 50;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  background: var(--hilo);
+  color: var(--denim-deep);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin__topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin__content {
+  min-width: 0;
+}
+
+/* cinta métrica: el gesto memorable */
+.admin__main::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--tape);
+  background:
+    linear-gradient(90deg, var(--denim) 0 2px, transparent 2px) 0 100% / 40px 62% repeat-x,
+    linear-gradient(90deg, var(--denim) 0 1px, transparent 1px) 0 100% / 8px 32% repeat-x,
+    var(--hilo);
+  box-shadow: 0 3px 0 rgba(19, 31, 71, 0.18);
+  /* la cinta entra deslizándose una sola vez al cargar */
+  animation: desenrollar 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes desenrollar {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ---------- Título con línea de hilo (grainline de patrón) ---------- */
+
+.admin__title {
+  position: relative;
+  max-width: 14ch;
+  margin: 0 0 1.5rem;
+  padding-left: 1.5rem;
+  font-size: clamp(2.5rem, 7vw, 5.25rem);
+  font-weight: 800;
+  font-variation-settings: "opsz" 96, "wdth" 75;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* flecha de hilo recto con puntas en ambos extremos */
+.admin__title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 2px;
+  background: var(--tiza);
+}
+
+.admin__title::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 10px;
+  background:
+    conic-gradient(from 135deg at 50% 100%, var(--tiza) 0 90deg, transparent 0) top / 100% 8px no-repeat,
+    conic-gradient(from -45deg at 50% 0, var(--tiza) 0 90deg, transparent 0) bottom / 100% 8px no-repeat;
+}
+
+/* ---------- Sesión: pieza de patrón compacta ---------- */
+
+.admin__session {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.5rem 1.05rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  background: #fff;
+  border: 1.5px dashed rgba(27, 42, 92, 0.45);
+  border-radius: 0.65rem;
+}
+
+.admin__session-role {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--denim-deep);
+  background: var(--hilo);
+  border-radius: 999px;
+}
+
+/* ---------- Responsive: la barra pasa a ser una tira superior ---------- */
+
+@media (max-width: 48rem) {
+  .admin {
+    flex-direction: column;
+  }
+
+  .admin__sidebar {
+    flex-basis: auto;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  /* la costura pasa a ser horizontal, abajo */
+  .admin__sidebar::after {
+    inset: auto 0.75rem 0.5rem;
+    width: auto;
+    height: 0;
+    border-right: 0;
+    border-bottom: 2px dashed var(--hilo);
+  }
+
+  .admin__nav ul {
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  }
+
+  .admin__sidebar-footer {
+    margin-top: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .admin__logout {
+    margin-top: 0;
+  }
+}
+
+/* ---------- Accesibilidad ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .admin__main::before {
+    animation: none;
+  }
+
+  .admin__nav li,
+  .admin__nav a,
+  .admin__store-link,
+  .admin__logout {
+    transition: none;
+  }
+}

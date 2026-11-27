@@ -1,0 +1,273 @@
+.account-page {
+  max-width: 36rem;
+  margin: 3rem auto;
+  padding: 0 1.25rem;
+  color: var(--color-cm-black, #111827);
+}
+
+.account-card {
+  position: relative;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 
+    0 20px 35px -10px rgba(17, 24, 39, 0.08),
+    0 4px 12px -2px rgba(37, 99, 235, 0.05);
+  overflow: hidden;
+  animation: cardSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Barra superior decorativa con el degradado de marca */
+.account-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-cm-blue, #2563EB),
+    var(--color-cm-amber, #F59E0B),
+    var(--color-cm-blue, #2563EB)
+  );
+  background-size: 200% 100%;
+  animation: gradientFlow 5s ease infinite;
+}
+
+/* --- ENCABEZADO Y AVATAR --- */
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.account-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--color-cm-blue, #2563EB), #1d4ed8);
+  color: #ffffff;
+  font-size: 1.625rem;
+  font-weight: 800;
+  box-shadow: 0 8px 18px -4px rgba(37, 99, 235, 0.35);
+  animation: avatarPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+
+.account-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.account-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.account-badge::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background-color: var(--color-cm-amber, #F59E0B);
+}
+
+.account-title {
+  margin: 0.15rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-cm-black, #111827);
+}
+
+.account-subtitle {
+  margin: 0;
+  font-size: 0.925rem;
+  color: #4b5563;
+}
+
+/* --- BLOQUE DE DATOS DEL USUARIO --- */
+.account-details {
+  display: grid;
+  gap: 0.875rem;
+  margin-top: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  animation: itemFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.detail-item:nth-child(1) { animation-delay: 0.12s; }
+.detail-item:nth-child(2) { animation-delay: 0.2s; }
+
+.detail-item:hover {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  transform: translateX(3px);
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-cm-black, #111827);
+  word-break: break-word;
+}
+
+/* --- BOTONES DE ACCIÓN --- */
+.account-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+  animation: itemFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
+}
+
+@media (min-width: 480px) {
+  .account-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.btn-secondary,
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: var(--color-cm-black, #111827);
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+.btn-logout {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.btn-logout:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -4px rgba(220, 38, 38, 0.35);
+}
+
+.btn-secondary:active,
+.btn-logout:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-secondary:focus-visible,
+.btn-logout:focus-visible {
+  outline: 3px solid var(--color-cm-amber, #F59E0B);
+  outline-offset: 2px;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes avatarPop {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes itemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,203 @@
+<section class="admin-section" aria-labelledby="categories-heading">
+  <header class="section-header">
+    <div>
+      <p class="section-eyebrow">Taller · Organización</p>
+      <h1 id="categories-heading" class="section-title">Categorías</h1>
+    </div>
+  </header>
+
+  @if (feedbackMessage()) {
+    <div role="status" aria-live="polite" class="alert alert--success">
+      <span>✓ {{ feedbackMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div role="alert" class="alert alert--error">
+      <span role="img" aria-label="Error">⚠️</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="categories-layout">
+    <article class="workshop-card">
+      <h2 id="cat-form-heading" class="card-title">
+        {{ editingId() !== null ? 'Editar categoría' : 'Nueva categoría' }}
+      </h2>
+
+      <form
+        #categoryFormEl
+        [formGroup]="categoryForm"
+        (ngSubmit)="submitCategory()"
+        aria-labelledby="cat-form-heading"
+        class="cat-form"
+        novalidate
+      >
+        <div class="field">
+          <label for="cat-nombre">Nombre <span aria-hidden="true">*</span></label>
+          <input
+            id="cat-nombre"
+            name="nombre"
+            type="text"
+            formControlName="nombre"
+            required
+            maxlength="100"
+            [attr.aria-invalid]="isFieldInvalid('nombre')"
+            [attr.aria-describedby]="isFieldInvalid('nombre') ? 'cat-nombre-error' : null"
+          />
+          @if (isFieldInvalid('nombre')) {
+            <p id="cat-nombre-error" class="field-error">
+              <span role="img" aria-label="Error">❌</span> El nombre de la categoría es obligatorio.
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="cat-slug">Slug (opcional)</label>
+          <span id="cat-slug-hint" class="field-hint">
+            Minúsculas, números y guiones. Si se deja vacío se genera automáticamente.
+          </span>
+          <input
+            id="cat-slug"
+            name="slug"
+            type="text"
+            formControlName="slug"
+            maxlength="110"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
+            [attr.aria-invalid]="isFieldInvalid('slug')"
+            [attr.aria-describedby]="
+              isFieldInvalid('slug') ? 'cat-slug-hint cat-slug-error' : 'cat-slug-hint'
+            "
+          />
+          @if (isFieldInvalid('slug')) {
+            <p id="cat-slug-error" class="field-error">
+              <span role="img" aria-label="Error">❌</span> Usa solo letras minúsculas, números y guiones.
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="cat-orden">Orden de aparición <span aria-hidden="true">*</span></label>
+          <input
+            id="cat-orden"
+            name="orden"
+            type="number"
+            min="0"
+            formControlName="orden"
+            required
+            [attr.aria-invalid]="isFieldInvalid('orden')"
+            [attr.aria-describedby]="isFieldInvalid('orden') ? 'cat-orden-error' : null"
+          />
+          @if (isFieldInvalid('orden')) {
+            <p id="cat-orden-error" class="field-error">
+              <span role="img" aria-label="Error">❌</span> Ingresa un número mayor o igual a 0.
+            </p>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            {{
+              saving()
+                ? 'Guardando…'
+                : editingId() !== null
+                  ? 'Guardar cambios'
+                  : 'Crear categoría'
+            }}
+          </button>
+
+          @if (editingId() !== null) {
+            <button type="button" class="btn-ghost" [disabled]="saving()" (click)="cancelEdit()">
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    </article>
+
+    <article class="workshop-card">
+      <h2 class="card-title">Listado de categorías</h2>
+
+      @if (pendingDelete(); as target) {
+        <div
+          class="confirm-box"
+          role="alertdialog"
+          aria-labelledby="cat-del-title"
+          aria-describedby="cat-del-desc"
+        >
+          <h3 id="cat-del-title" class="confirm-title">
+            ¿Eliminar la categoría "{{ target.nombre }}"?
+          </h3>
+          <p id="cat-del-desc" class="confirm-desc">
+            Solo se pueden eliminar categorías sin productos asociados.
+          </p>
+          <div class="confirm-actions">
+            <button
+              type="button"
+              class="btn-danger"
+              [disabled]="deleting()"
+              (click)="confirmDelete()"
+            >
+              {{ deleting() ? 'Eliminando…' : 'Confirmar eliminación' }}
+            </button>
+            <button
+              type="button"
+              class="btn-ghost"
+              [disabled]="deleting()"
+              (click)="cancelDelete()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (loading()) {
+        <p class="state-msg" aria-busy="true">Cargando categorías…</p>
+      } @else if (categories().length === 0) {
+        <p class="state-msg">Aún no hay categorías registradas.</p>
+      } @else {
+        <div tabindex="0" role="region" aria-labelledby="categories-table-caption" class="table-wrapper">
+          <table class="data-table">
+            <caption id="categories-table-caption" class="visually-hidden">
+              Categorías del catálogo y cantidad de productos
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Orden</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Slug</th>
+                <th scope="col">Productos</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cat of categories(); track cat.id) {
+                <tr>
+                  <td class="cell-num">{{ cat.orden }}</td>
+                  <th scope="row" class="cell-name">{{ cat.nombre }}</th>
+                  <td class="cell-slug">{{ cat.slug }}</td>
+                  <td class="cell-num">
+                    <span class="count-pill">{{ cat.productos_count }}</span>
+                  </td>
+                  <td>
+                    <div class="row-actions">
+                      <button type="button" class="action-link" (click)="startEdit(cat)">
+                        Editar
+                      </button>
+                      <button type="button" class="action-danger" (click)="requestDelete(cat)">
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
+  </div>
+</section>

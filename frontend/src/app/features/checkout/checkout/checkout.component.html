@@ -1,0 +1,691 @@
+<!-- Enlace de salto para navegación por teclado -->
+<a
+  href="#checkout-main"
+  class="visually-hidden focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-cm-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-cm-black"
+>
+  Saltar al formulario de pago
+</a>
+
+<!-- Encabezado principal -->
+<header class="bg-cm-dark-gray text-white">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-8">
+      <a routerLink="/" class="text-2xl font-extrabold tracking-tight text-white">
+        Click<span class="text-cm-amber">Moda</span>
+      </a>
+
+      <nav aria-label="Categorías principales" class="hidden md:block">
+        <ul class="flex items-center gap-6 text-sm font-medium text-gray-200">
+          <li><a routerLink="/" class="hover:text-white">Mujer</a></li>
+          <li><a routerLink="/" class="hover:text-white">Hombre</a></li>
+          <li><a routerLink="/" class="hover:text-white">Niños</a></li>
+          <li><a routerLink="/" class="hover:text-cm-amber">Ofertas</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="flex flex-1 items-center justify-end gap-4 sm:flex-initial">
+      <div class="hidden w-64 sm:block">
+        <label for="header-search-checkout" class="visually-hidden">Buscar prendas</label>
+        <input
+          id="header-search-checkout"
+          type="search"
+          placeholder="Buscar prendas"
+          readonly
+          routerLink="/"
+          class="w-full cursor-pointer rounded-lg border border-gray-500 bg-white px-3.5 py-2 text-sm text-cm-black placeholder-gray-500"
+        />
+      </div>
+
+      <nav aria-label="Cuenta y carrito" class="flex items-center gap-4 text-sm font-medium whitespace-nowrap">
+        @if (auth.isLoggedIn()) {
+          <a routerLink="/cuenta" class="text-gray-100 hover:text-white">Mi cuenta</a>
+        } @else {
+          <a routerLink="/login" [queryParams]="{ returnUrl: '/checkout' }" class="text-gray-100 hover:text-white">
+            Mi cuenta
+          </a>
+        }
+        <a routerLink="/carrito" class="font-semibold text-cm-amber hover:underline">
+          Carrito ({{ cartService.totalUnits() }})
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- Contenido principal de Checkout -->
+<main id="checkout-main" tabindex="-1" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+  <!-- Barra de progreso de pasos (1 Carrito, 2 Envío, 3 Pago, 4 Factura) -->
+  <nav aria-label="Pasos del proceso de compra" class="mb-6">
+    <ol class="flex flex-wrap items-center gap-2.5 list-none p-0 m-0">
+      <li>
+        <a routerLink="/carrito" class="step-pill">1 Carrito</a>
+      </li>
+      <li>
+        <button
+          type="button"
+          (click)="setStep(2)"
+          [attr.aria-current]="activeStep() === 2 ? 'step' : null"
+          [class.step-pill-active]="activeStep() === 2"
+          class="step-pill"
+        >
+          2 Envío
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          (click)="setStep(3)"
+          [attr.aria-current]="activeStep() === 3 ? 'step' : null"
+          [class.step-pill-active]="activeStep() === 3"
+          class="step-pill"
+        >
+          3 Pago
+        </button>
+      </li>
+      <li>
+        <span
+          [attr.aria-current]="activeStep() === 4 ? 'step' : null"
+          [class.step-pill-active]="activeStep() === 4"
+          class="step-pill"
+        >
+          4 Factura
+        </span>
+      </li>
+    </ol>
+  </nav>
+
+  @if (submitError()) {
+    <div role="alert" class="checkout-alert checkout-alert-error mb-6">
+      <span aria-hidden="true">❌</span>
+      <span>{{ submitError() }}</span>
+    </div>
+  }
+
+    @if (createdOrder(); as order) {
+    <section
+      aria-labelledby="order-created-heading"
+      class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs sm:p-8"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-4">
+        <div>
+          <span
+            [class]="
+              order.estado === 'PAGADA'
+                ? 'badge-status badge-status-paid'
+                : order.estado === 'CANCELADA'
+                  ? 'badge-status badge-status-cancelled'
+                  : 'badge-status badge-status-pending'
+            "
+          >
+            Orden #{{ order.id }} · {{ order.estado }}
+          </span>
+          <h1 id="order-created-heading" class="mt-2 text-2xl font-extrabold text-cm-black">
+            @if (order.estado === 'PAGADA') {
+              ¡Pago confirmado y stock descontado!
+            } @else if (order.estado === 'CANCELADA') {
+              Pago rechazado · Reserva de stock liberada
+            } @else {
+              Orden creada en estado Pendiente
+            }
+          </h1>
+          <p class="mt-1 text-sm text-gray-600">
+            Envío a {{ order.direccion_envio.nombre_completo }} — {{ order.direccion_envio.direccion }}, {{ order.direccion_envio.ciudad }}.
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-gray-500">Total congelado en la orden</p>
+          <p class="text-2xl font-extrabold text-cm-black">
+            {{ order.total | currency: 'COP' : '$' : '1.0-0' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Resumen de transacción Payment -->
+      @if (order.payment; as payment) {
+        <div class="mt-5 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="font-semibold text-gray-700">Referencia de Pasarela</p>
+            <p class="mt-1 font-bold text-cm-black">{{ payment.referencia }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">{{ payment.pasarela }} ({{ order.metodo_pago }})</p>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="font-semibold text-gray-700">Estado de la Transacción</p>
+            <p class="mt-1 font-bold text-cm-black">{{ payment.estado }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">{{ payment.mensaje_respuesta }}</p>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="font-semibold text-gray-700">Estado del Inventario</p>
+            <p class="mt-1 font-bold text-cm-black">
+              {{ order.stock_descontado ? '✓ Stock descontado en BD' : 'Stock sin descontar / Liberado' }}
+            </p>
+            <p class="mt-0.5 text-xs text-gray-500">Transacción atómica PostgreSQL</p>
+          </div>
+        </div>
+      }
+
+      <!-- Tabla de OrderItems con Precio e IVA congelados al momento de la compra -->
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <caption class="visually-hidden">Prendas de la orden con precio e IVA congelados</caption>
+          <thead class="border-b border-gray-200 text-xs font-bold text-gray-600">
+            <tr>
+              <th scope="col" class="py-2 pr-4">Prenda (Variante)</th>
+              <th scope="col" class="py-2 px-4">Cant.</th>
+              <th scope="col" class="py-2 px-4">Precio unit. congelado</th>
+              <th scope="col" class="py-2 px-4">IVA congelado</th>
+              <th scope="col" class="py-2 pl-4 text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (item of order.items; track item.id) {
+              <tr>
+                <td class="py-2.5 pr-4 font-semibold text-cm-black">
+                  {{ item.nombre_producto }} ({{ item.talla }} · {{ item.color }})
+                </td>
+                <td class="py-2.5 px-4">{{ item.cantidad }}</td>
+                <td class="py-2.5 px-4">
+                  {{ item.precio_unitario | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+                <td class="py-2.5 px-4">{{ item.porcentaje_iva }}%</td>
+                <td class="py-2.5 pl-4 text-right font-bold text-cm-black">
+                  {{ item.subtotal | currency: 'COP' : '$' : '1.0-0' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Simulador interactivo del Webhook de la Pasarela (RF-13 y RF-14) -->
+      <div class="gateway-simulator mt-6">
+        <h2 class="text-sm font-extrabold text-cm-black">
+          Simulador de Pasarela de Pago (Webhook `POST /api/v1/payments/webhook/`)
+        </h2>
+        <p class="mt-1 text-xs text-gray-600">
+          Simula la respuesta firmada de la pasarela para ejecutar la transacción atómica:
+        </p>
+
+        <div class="mt-3 flex flex-wrap gap-3">
+          <button
+            type="button"
+            (click)="simulateWebhook('APROBADO')"
+            [disabled]="simulatingWebhook() || order.estado === 'PAGADA'"
+            class="btn-sim-approve"
+          >
+            ✓ Simular Pago Aprobado (Descontar stock)
+          </button>
+
+          <button
+            type="button"
+            (click)="simulateWebhook('RECHAZADO')"
+            [disabled]="simulatingWebhook()"
+            class="btn-sim-reject"
+          >
+            ✕ Simular Fallo de Pago (Liberar / Devolver stock)
+          </button>
+
+          @if (order.factura_id) {
+            <a
+              [routerLink]="['/factura', order.factura_id]"
+              class="btn-sim-approve no-underline"
+            >
+              Ver factura electrónica ({{ order.factura_numero }})
+            </a>
+          }
+
+          <button type="button" (click)="continueShopping()" class="btn-pay">
+            Volver al catálogo
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+  
+  @else {
+    <!-- Formulario Reactivo Principal de Checkout -->
+    <form
+      [formGroup]="checkoutForm"
+      (ngSubmit)="submitCheckout()"
+      novalidate
+      class="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start"
+    >
+      <!-- Columna izquierda: Dirección de envío + Método de pago -->
+      <div class="space-y-6">
+        <!-- Tarjeta 1: Dirección de envío (RF-11) -->
+        <section
+          aria-labelledby="shipping-heading"
+          class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs"
+        >
+          <h1 id="shipping-heading" class="text-lg font-extrabold text-cm-black">
+            Dirección de envío
+          </h1>
+
+          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Nombre completo -->
+            <div>
+              <label for="shipping-name" class="field-label">Nombre completo</label>
+              <input
+                id="shipping-name"
+                name="nombreCompleto"
+                type="text"
+                formControlName="nombreCompleto"
+                autocomplete="shipping name"
+                enterkeyhint="next"
+                placeholder="Ej. María Gómez"
+                [attr.aria-invalid]="isInvalid('nombreCompleto')"
+                (focus)="setStep(2)"
+                class="field-input"
+              />
+              @if (isInvalid('nombreCompleto')) {
+                <p class="field-error">Ingresa tu nombre completo.</p>
+              }
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label for="shipping-phone" class="field-label">Teléfono</label>
+              <input
+                id="shipping-phone"
+                name="telefono"
+                type="tel"
+                inputmode="tel"
+                formControlName="telefono"
+                autocomplete="shipping tel"
+                enterkeyhint="next"
+                placeholder="300 000 0000"
+                [attr.aria-invalid]="isInvalid('telefono')"
+                (focus)="setStep(2)"
+                class="field-input"
+              />
+              @if (isInvalid('telefono')) {
+                <p class="field-error">Ingresa un teléfono de contacto válido.</p>
+              }
+            </div>
+
+            <!-- Dirección -->
+            <div>
+              <label for="shipping-address" class="field-label">Dirección</label>
+              <input
+                id="shipping-address"
+                name="direccion"
+                type="text"
+                formControlName="direccion"
+                autocomplete="shipping street-address"
+                enterkeyhint="next"
+                placeholder="Calle 10 # 5–20"
+                [attr.aria-invalid]="isInvalid('direccion')"
+                (focus)="setStep(2)"
+                class="field-input"
+              />
+              @if (isInvalid('direccion')) {
+                <p class="field-error">Ingresa una dirección de entrega válida.</p>
+              }
+            </div>
+
+            <!-- Ciudad -->
+            <div>
+              <label for="shipping-city" class="field-label">Ciudad</label>
+              <input
+                id="shipping-city"
+                name="ciudad"
+                type="text"
+                formControlName="ciudad"
+                autocomplete="shipping address-level2"
+                enterkeyhint="next"
+                placeholder="Pasto"
+                [attr.aria-invalid]="isInvalid('ciudad')"
+                (focus)="setStep(2)"
+                class="field-input"
+              />
+              @if (isInvalid('ciudad')) {
+                <p class="field-error">Ingresa la ciudad de destino.</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Tarjeta 2: Método de pago (RF-12) -->
+        <section
+          aria-labelledby="payment-heading"
+          class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs"
+        >
+          <h2 id="payment-heading" class="text-lg font-extrabold text-cm-black">
+            Método de pago
+          </h2>
+
+          <fieldset class="mt-4 space-y-3 border-0 p-0">
+            <legend class="visually-hidden">Selecciona cómo deseas pagar tu pedido</legend>
+
+            <!-- Opción 1: Tarjeta crédito / débito -->
+            <label
+              for="pay-card"
+              [class.payment-option-active]="checkoutForm.controls.metodoPago.value === 'TARJETA'"
+              class="payment-option"
+            >
+              <input
+                id="pay-card"
+                type="radio"
+                formControlName="metodoPago"
+                value="TARJETA"
+                (change)="selectPaymentMethod('TARJETA')"
+                class="h-4 w-4"
+              />
+              <div>
+                <span class="block text-sm font-bold text-cm-black">Tarjeta crédito / débito</span>
+                <span class="block text-xs text-gray-500">Visa, Mastercard, American Express</span>
+              </div>
+            </label>
+
+            <!-- Subformulario de tarjeta (visible cuando TARJETA está activo) -->
+            @if (checkoutForm.controls.metodoPago.value === 'TARJETA') {
+              <div class="grid grid-cols-1 gap-4 pt-2 pb-3 sm:grid-cols-2">
+                <!-- Número de tarjeta -->
+                <div>
+                  <label for="cc-number" class="field-label">Número de tarjeta</label>
+                  <input
+                    id="cc-number"
+                    name="cc-number"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="cc-number"
+                    enterkeyhint="next"
+                    maxlength="19"
+                    formControlName="numeroTarjeta"
+                    (input)="formatCardNumberInput()"
+                    placeholder="0000 0000 0000 0000"
+                    [attr.aria-invalid]="isInvalid('numeroTarjeta')"
+                    class="field-input"
+                  />
+                  @if (isInvalid('numeroTarjeta')) {
+                    <p class="field-error">Ingresa los dígitos de la tarjeta (13 a 19 dígitos).</p>
+                  }
+                </div>
+
+                <!-- Nombre en la tarjeta -->
+                <div>
+                  <label for="cc-name" class="field-label">Nombre en la tarjeta</label>
+                  <input
+                    id="cc-name"
+                    name="cc-name"
+                    type="text"
+                    autocomplete="cc-name"
+                    enterkeyhint="next"
+                    maxlength="60"
+                    formControlName="nombreTarjeta"
+                    placeholder="Como aparece en la tarjeta"
+                    [attr.aria-invalid]="isInvalid('nombreTarjeta')"
+                    class="field-input"
+                  />
+                  @if (isInvalid('nombreTarjeta')) {
+                    <p class="field-error">Ingresa el nombre del titular.</p>
+                  }
+                </div>
+
+                <!-- Vencimiento, CVV y Cuotas en 3 columnas -->
+                <div class="grid grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-3">
+                  <div>
+                    <label for="cc-exp" class="field-label">Vencimiento</label>
+                    <span id="exp-hint" class="visually-hidden">Formato mes y año MM/AA</span>
+                    <input
+                      id="cc-exp"
+                      name="cc-exp"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="cc-exp"
+                      aria-describedby="exp-hint"
+                      enterkeyhint="next"
+                      maxlength="5"
+                      formControlName="vencimiento"
+                      (input)="formatExpiryInput()"
+                      placeholder="MM/AA"
+                      [attr.aria-invalid]="isInvalid('vencimiento')"
+                      class="field-input"
+                    />
+                    @if (isInvalid('vencimiento')) {
+                      <p class="field-error">Usa formato MM/AA.</p>
+                    }
+                  </div>
+
+                  <div>
+                    <label for="cc-csc" class="field-label">CVV</label>
+                    <input
+                      id="cc-csc"
+                      name="cc-csc"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="cc-csc"
+                      enterkeyhint="next"
+                      maxlength="4"
+                      formControlName="cvv"
+                      placeholder="123"
+                      [attr.aria-invalid]="isInvalid('cvv')"
+                      class="field-input"
+                    />
+                    @if (isInvalid('cvv')) {
+                      <p class="field-error">3 o 4 dígitos.</p>
+                    }
+                  </div>
+
+                  <div>
+                    <label for="cc-installments" class="field-label">Cuotas</label>
+                    <input
+                      id="cc-installments"
+                      name="cuotas"
+                      type="number"
+                      min="1"
+                      max="36"
+                      enterkeyhint="done"
+                      formControlName="cuotas"
+                      class="field-input"
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Opción 2: PSE -->
+            <label
+              for="pay-pse"
+              [class.payment-option-active]="checkoutForm.controls.metodoPago.value === 'PSE'"
+              class="payment-option"
+            >
+              <input
+                id="pay-pse"
+                type="radio"
+                formControlName="metodoPago"
+                value="PSE"
+                (change)="selectPaymentMethod('PSE')"
+                class="h-4 w-4"
+              />
+              <div>
+                <span class="block text-sm font-bold text-cm-black">PSE</span>
+                <span class="block text-xs text-gray-500">Débito desde tu banco</span>
+              </div>
+            </label>
+
+            @if (checkoutForm.controls.metodoPago.value === 'PSE') {
+              <div class="pt-1 pb-2">
+                <label for="pse-bank" class="field-label">Selecciona tu entidad bancaria</label>
+                <select id="pse-bank" formControlName="bancoPse" class="field-input">
+                  <option value="Bancolombia">Bancolombia</option>
+                  <option value="Banco de Bogotá">Banco de Bogotá</option>
+                  <option value="Davivienda">Davivienda</option>
+                  <option value="BBVA Colombia">BBVA Colombia</option>
+                  <option value="Banco de Occidente">Banco de Occidente</option>
+                </select>
+              </div>
+            }
+
+            <!-- Opción 3: Nequi / Daviplata -->
+            <label
+              for="pay-wallet"
+              [class.payment-option-active]="checkoutForm.controls.metodoPago.value === 'NEQUI_DAVIPLATA'"
+              class="payment-option"
+            >
+              <input
+                id="pay-wallet"
+                type="radio"
+                formControlName="metodoPago"
+                value="NEQUI_DAVIPLATA"
+                (change)="selectPaymentMethod('NEQUI_DAVIPLATA')"
+                class="h-4 w-4"
+              />
+              <div>
+                <span class="block text-sm font-bold text-cm-black">Nequi / Daviplata</span>
+                <span class="block text-xs text-gray-500">Pago con tu celular</span>
+              </div>
+            </label>
+
+            <!-- Opción 4: Contra entrega -->
+            <label
+              for="pay-cod"
+              [class.payment-option-active]="checkoutForm.controls.metodoPago.value === 'CONTRA_ENTREGA'"
+              class="payment-option"
+            >
+              <input
+                id="pay-cod"
+                type="radio"
+                formControlName="metodoPago"
+                value="CONTRA_ENTREGA"
+                (change)="selectPaymentMethod('CONTRA_ENTREGA')"
+                class="h-4 w-4"
+              />
+              <div>
+                <span class="block text-sm font-bold text-cm-black">Contra entrega</span>
+                <span class="block text-xs text-gray-500">Efectivo al recibir (según ciudad)</span>
+              </div>
+            </label>
+          </fieldset>
+        </section>
+      </div>
+
+      <!-- Columna derecha: Resumen "Tu pedido" y casilla de Factura Electrónica -->
+      <aside
+        aria-labelledby="order-summary-heading"
+        class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs"
+      >
+        <h2 id="order-summary-heading" class="text-lg font-extrabold text-cm-black">
+          Tu pedido
+        </h2>
+
+        <ul role="list" class="mt-4 space-y-2.5 text-sm list-none p-0 m-0">
+          @for (item of cart().items; track item.id) {
+            <li class="flex items-center justify-between gap-2">
+              <span class="text-gray-700">
+                {{ item.nombre_producto }} x{{ item.cantidad }}
+              </span>
+              <span class="font-medium text-cm-black">
+                {{ item.subtotal | currency: 'COP' : '$' : '1.0-0' }}
+              </span>
+            </li>
+          }
+        </ul>
+
+        <dl class="mt-3 space-y-2 border-t border-gray-100 pt-3 text-sm">
+          <div class="flex items-center justify-between">
+            <dt class="text-gray-700">Envío</dt>
+            <dd class="font-medium text-cm-black">
+              {{ cart().envio | currency: 'COP' : '$' : '1.0-0' }}
+            </dd>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <dt class="text-gray-700">IVA (19%)</dt>
+            <dd class="font-medium text-cm-black">
+              {{ cart().iva | currency: 'COP' : '$' : '1.0-0' }}
+            </dd>
+          </div>
+
+          @if (cart().descuento > 0) {
+            <div class="flex items-center justify-between text-cm-blue">
+              <dt class="font-medium">Descuento ({{ cart().cupon_codigo }})</dt>
+              <dd class="font-semibold">
+                -{{ cart().descuento | currency: 'COP' : '$' : '1.0-0' }}
+              </dd>
+            </div>
+          }
+        </dl>
+
+        <div class="my-4 border-t border-gray-200 pt-4">
+          <div class="flex items-center justify-between">
+            <span class="text-lg font-extrabold text-cm-black">Total</span>
+            <span class="text-xl font-extrabold text-cm-black">
+              {{ cart().total | currency: 'COP' : '$' : '1.0-0' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Casilla de Factura Electrónica DIAN (RF-16) -->
+        <div class="mb-4">
+          <label
+            for="want-invoice"
+            class="brand-checkbox-label flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-700"
+          >
+            <input
+              id="want-invoice"
+              type="checkbox"
+              formControlName="requiereFacturaElectronica"
+              class="brand-checkbox h-4 w-4 rounded border-gray-400"
+            />
+            <span>Quiero factura electrónica a mi nombre</span>
+          </label>
+
+          @if (checkoutForm.controls.requiereFacturaElectronica.value) {
+            <div class="mt-3 space-y-2.5 rounded-xl bg-gray-50 p-3">
+              <div class="grid grid-cols-[90px_1fr] gap-2">
+                <div>
+                  <label for="doc-type" class="field-label">Tipo doc.</label>
+                  <select id="doc-type" formControlName="tipoDocumento" class="field-input">
+                    <option value="CC">CC</option>
+                    <option value="NIT">NIT</option>
+                    <option value="CE">CE</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="doc-number" class="field-label">Documento / NIT</label>
+                  <input
+                    id="doc-number"
+                    type="text"
+                    inputmode="numeric"
+                    formControlName="numeroDocumento"
+                    placeholder="Ej. 1085000000"
+                    class="field-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="invoice-email" class="field-label">Correo para envío de factura</label>
+                <input
+                  id="invoice-email"
+                  type="email"
+                  autocomplete="email"
+                  formControlName="correoFactura"
+                  placeholder="cliente@correo.com"
+                  class="field-input"
+                />
+              </div>
+            </div>
+          }
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="submitting() || cart().items.length === 0"
+          class="btn-pay w-full"
+        >
+          @if (submitting()) {
+            Procesando pago…
+          } @else {
+            Pagar {{ cart().total | currency: 'COP' : '$' : '1.0-0' }}
+          }
+        </button>
+
+        <p class="mt-3 text-center text-xs text-gray-500">
+          Pago seguro cifrado
+        </p>
+      </aside>
+    </form>
+  }
+</main>

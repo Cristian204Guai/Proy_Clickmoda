@@ -1,0 +1,220 @@
+<div class="users-page">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Administración</p>
+      <h1 class="page-title">Gestión de usuarios</h1>
+    </div>
+    <p class="total-pill">{{ totalCount() }} cuentas registradas</p>
+  </header>
+
+  <section aria-labelledby="users-filter-title" class="card filter-card">
+    <h2 id="users-filter-title" class="visually-hidden">Filtrar usuarios</h2>
+    <search>
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filter-form">
+        <div class="field field--grow">
+          <label for="users-search">Buscar por nombre o correo</label>
+          <input
+            id="users-search"
+            name="search"
+            type="search"
+            formControlName="search"
+            placeholder="Ej. ana@correo.com o Ana"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
+            enterkeyhint="search"
+          />
+        </div>
+
+        <div class="field">
+          <label for="users-role">Rol</label>
+          <select id="users-role" name="role" formControlName="role">
+            <option value="">Todos los roles</option>
+            <option value="ADMIN">ADMIN</option>
+            <option value="CLIENTE">CLIENTE</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="users-active">Estado de cuenta</label>
+          <select id="users-active" name="is_active" formControlName="is_active">
+            <option value="">Todos</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn--primary" [disabled]="loading()">
+            Filtrar
+          </button>
+          <button type="button" class="btn btn--secondary" (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </form>
+    </search>
+  </section>
+
+  @if (actionError()) {
+    <div class="card alert alert--error" role="alert">
+      <span>✕ {{ actionError() }}</span>
+    </div>
+  }
+
+  <div aria-live="polite" role="status">
+    @if (actionMessage()) {
+      <div class="card alert alert--success">
+        <span>✓ {{ actionMessage() }}</span>
+      </div>
+    }
+  </div>
+
+  <section aria-labelledby="users-list-title" class="card table-card">
+    <h2 id="users-list-title" class="section-title">Cuentas de usuarios</h2>
+
+    @if (loading()) {
+      <p class="state-message" aria-busy="true" role="status">Cargando usuarios…</p>
+    } @else if (error()) {
+      <div class="alert alert--error" role="alert">
+        <span>✕ {{ error() }}</span>
+        <button type="button" class="btn btn--secondary" (click)="loadUsers()">Reintentar</button>
+      </div>
+    } @else if (users().length === 0) {
+      <p class="state-message">No encontramos usuarios con los filtros seleccionados.</p>
+    } @else {
+      <div
+        tabindex="0"
+        role="region"
+        aria-labelledby="users-table-caption"
+        class="overflow-x-auto table-wrapper"
+      >
+        <table class="admin-table">
+          <caption id="users-table-caption" class="visually-hidden">
+            Listado de usuarios con rol, estado, fecha de registro, órdenes y acciones
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col">Teléfono</th>
+              <th scope="col">Rol y permisos</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="text-center">Órdenes</th>
+              <th scope="col">Registro</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users(); track u.id) {
+              @let disabled = isRowDisabled(u);
+              <tr>
+                <th scope="row" class="user-identity">
+                  <span class="user-name">{{ u.nombre || 'Sin nombre' }}</span>
+                  <span class="user-email">{{ u.email }}</span>
+                  @if (isSelf(u)) {
+                    <span class="self-tag">Tu cuenta</span>
+                  }
+                </th>
+                <td>{{ u.telefono || '—' }}</td>
+                <td>
+                  <div class="badge-group">
+                    <span
+                      class="badge"
+                      [class.badge--admin]="u.role === 'ADMIN'"
+                      [class.badge--client]="u.role === 'CLIENTE'"
+                    >
+                      <span aria-hidden="true">{{ u.role === 'ADMIN' ? '★' : '●' }}</span>
+                      <span>{{ u.role }}</span>
+                    </span>
+                    @if (u.is_superuser) {
+                      <span class="badge badge--superuser">
+                        <span aria-hidden="true">🛡</span>
+                        <span>Superusuario</span>
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.badge--active]="u.is_active"
+                    [class.badge--inactive]="!u.is_active"
+                  >
+                    <span aria-hidden="true">{{ u.is_active ? '✓' : '○' }}</span>
+                    <span>{{ u.is_active ? 'Activo' : 'Inactivo' }}</span>
+                  </span>
+                </td>
+                <td class="text-center">{{ u.ordenes_count }}</td>
+                <td class="cell-date">{{ u.date_joined | date: 'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="btn-row"
+                      [class.btn-row--warn]="u.is_active"
+                      [class.btn-row--ok]="!u.is_active"
+                      [disabled]="disabled"
+                      [attr.aria-label]="(u.is_active ? 'Desactivar' : 'Activar') + ' cuenta de ' + u.email"
+                      (click)="toggleActive(u)"
+                    >
+                      {{ u.is_active ? 'Desactivar' : 'Activar' }}
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-row btn-row--role"
+                      [disabled]="disabled"
+                      [attr.aria-label]="
+                        (u.role === 'ADMIN' ? 'Retirar ADMIN' : 'Asignar ADMIN') + ' a ' + u.email
+                      "
+                      (click)="toggleRole(u)"
+                    >
+                      {{ u.role === 'ADMIN' ? 'Retirar ADMIN' : 'Asignar ADMIN' }}
+                    </button>
+                  </div>
+                  @if (isProtectedSuperuser(u)) {
+                    <p class="row-hint">Solo editable por superusuario</p>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Paginación de usuarios">
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            Anterior
+          </button>
+          <div class="page-list">
+            @for (page of pageNumbers(); track page) {
+              <button
+                type="button"
+                class="page-btn"
+                [class.page-btn--current]="page === currentPage()"
+                [attr.aria-current]="page === currentPage() ? 'page' : null"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </nav>
+      }
+    }
+  </section>
+</div>

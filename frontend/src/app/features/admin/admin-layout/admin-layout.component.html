@@ -1,0 +1,45 @@
+<a href="#admin-main" class="visually-hidden admin__skip-link">
+  Saltar al contenido de administración
+</a>
+
+<div class="admin">
+  <aside class="admin__sidebar">
+    <strong class="admin__brand">Click<span class="admin__brand-accent">Moda</span></strong>
+    <nav class="admin__nav" aria-label="Administración">
+      <ul>
+        <li>
+          <a
+            routerLink="/admin"
+            routerLinkActive="is-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Panel
+          </a>
+        </li>
+        <li><a routerLink="/admin/productos" routerLinkActive="is-active">Productos</a></li>
+        <li><a routerLink="/admin/categorias" routerLinkActive="is-active">Categorías</a></li>
+        <li><a routerLink="/admin/ordenes" routerLinkActive="is-active">Órdenes</a></li>
+        <li><a routerLink="/admin/usuarios" routerLinkActive="is-active">Usuarios</a></li>
+        <li><a routerLink="/admin/facturacion" routerLinkActive="is-active">Facturación DIAN</a></li>
+      </ul>
+    </nav>
+
+    <div class="admin__sidebar-footer">
+      <a routerLink="/" class="admin__store-link">Ver tienda</a>
+      <button type="button" class="admin__logout" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main id="admin-main" tabindex="-1" class="admin__main">
+    <header class="admin__topbar">
+      <p class="admin__session">
+        Sesión: <strong>{{ auth.user()?.email }}</strong>
+        <span class="admin__session-role">{{ auth.user()?.role }}</span>
+      </p>
+    </header>
+
+    <section class="admin__content" aria-label="Vista administrativa">
+      <router-outlet />
+    </section>
+  </main>
+</div>

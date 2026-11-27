@@ -1,0 +1,237 @@
+/* ==========================================================================
+   CLICKMODA CATALOG — DESIGN ENGINEERING MOTION & UI POLISH
+   Basado en los principios de Emil Kowalski:
+   - Solo animar transform y opacity (compositor GPU)
+   - UI < 300ms con curvas --ease-out: cubic-bezier(0.23, 1, 0.32, 1)
+   - Nunca scale(0); entradas desde scale(0.96–0.98) + opacity: 0
+   - Feedback táctil inmediato en botones (:active scale(0.97))
+   - Hover protegido con @media (hover: hover) and (pointer: fine)
+   ========================================================================== */
+
+@keyframes cmCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   HEADER, NAVEGACIÓN Y BUSCADOR
+   ========================================================================== */
+
+.cm-nav-link {
+  position: relative;
+  transition: color 160ms ease, transform 140ms var(--ease-out);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.cm-nav-link:active {
+  transform: scale(0.97);
+}
+
+.cm-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  border-radius: 9999px;
+  background-color: var(--color-cm-amber);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 200ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cm-nav-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+/* Buscador principal */
+#catalog-search {
+  transition:
+    border-color 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out),
+    background-color 180ms ease;
+}
+
+#catalog-search:focus {
+  border-color: var(--color-cm-amber);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  outline: none;
+}
+
+/* ==========================================================================
+   SIDEBAR DE FILTROS (#sidebar-filters)
+   ========================================================================== */
+
+#sidebar-filters {
+  transform-origin: top center;
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out),
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+}
+
+.brand-checkbox-label {
+  transition: color 140ms ease, background-color 140ms ease;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.brand-checkbox {
+  transition: transform 140ms var(--ease-out);
+}
+
+.brand-checkbox:active {
+  transform: scale(0.94);
+}
+
+/* Botones de talla, color y controles de filtro */
+.cm-pressable,
+#sidebar-filters fieldset button,
+nav[aria-label="Paginación del catálogo"] button {
+  touch-action: manipulation;
+  user-select: none;
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.cm-pressable:active:not(:disabled),
+#sidebar-filters fieldset button:active:not(:disabled),
+nav[aria-label="Paginación del catálogo"] button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #sidebar-filters fieldset button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  nav[aria-label="Paginación del catálogo"] button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+/* Inputs de precio y selector de ordenamiento */
+#min-price,
+#max-price,
+#sort-select {
+  transition:
+    border-color 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out),
+    background-color 160ms ease;
+}
+
+#min-price:focus,
+#max-price:focus,
+#sort-select:focus {
+  border-color: var(--color-cm-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  outline: none;
+}
+
+/* ==========================================================================
+   GRILLA Y TARJETAS DE PRODUCTOS
+   ========================================================================== */
+
+.cm-product-card {
+  animation: cmCardEnter 260ms var(--ease-out) both;
+  transition:
+    transform 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out),
+    border-color 200ms ease;
+}
+
+/* Coreografía no uniforme y breve (< 150ms máx) para no bloquear ni parecer metrónomo */
+.cm-product-card:nth-child(1) { animation-delay: 0ms; }
+.cm-product-card:nth-child(2) { animation-delay: 25ms; }
+.cm-product-card:nth-child(3) { animation-delay: 45ms; }
+.cm-product-card:nth-child(4) { animation-delay: 60ms; }
+.cm-product-card:nth-child(5) { animation-delay: 75ms; }
+.cm-product-card:nth-child(6) { animation-delay: 95ms; }
+.cm-product-card:nth-child(7) { animation-delay: 110ms; }
+.cm-product-card:nth-child(8) { animation-delay: 120ms; }
+
+.cm-product-media {
+  transition: transform 260ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cm-product-card:hover {
+    transform: translateY(-3px);
+    border-color: #cbd5e1;
+    box-shadow:
+      0 12px 24px -8px rgba(17, 24, 39, 0.08),
+      0 4px 8px -4px rgba(17, 24, 39, 0.04);
+  }
+
+  .cm-product-card:hover .cm-product-media {
+    transform: scale(1.03);
+  }
+}
+
+/* ==========================================================================
+   BOTÓN PRINCIPAL DE ACCIÓN (AGREGAR AL CARRITO / APLICAR)
+   ========================================================================== */
+
+.cm-btn-primary {
+  touch-action: manipulation;
+  user-select: none;
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 150ms ease,
+    box-shadow 150ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cm-btn-primary:hover:not(:disabled) {
+    box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.35);
+  }
+}
+
+.cm-btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
+   ACCESIBILIDAD: MOVIMIENTO REDUCIDO (CONSERVA OPACIDAD Y COLOR)
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-product-card {
+    animation: none;
+  }
+
+  .cm-product-card,
+  .cm-product-media,
+  .cm-btn-primary,
+  .cm-pressable,
+  .cm-nav-link,
+  .cm-nav-link::after,
+  #sidebar-filters,
+  #sidebar-filters fieldset button,
+  nav[aria-label="Paginación del catálogo"] button {
+    transition-property: opacity, color, background-color, border-color, box-shadow !important;
+    transition-duration: 150ms !important;
+    transform: none !important;
+  }
+}
